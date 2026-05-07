@@ -1,0 +1,77 @@
+.analytics-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 1300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.analytics-modal {
+  width: min(1000px, 90vw);
+  max-height: 85vh;
+  overflow-y: auto;
+  background: rgba(17, 22, 30, 0.98);
+  color: white;
+  border-radius: 20px;
+  padding: 22px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.analytics-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.analytics-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.analytics-close {
+  border: none;
+  background: transparent;
+  color: white;
+  font-size: 1.8rem;
+  cursor: pointer;
+}
+
+.analytics-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.analytics-stat-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.analytics-stat-card span {
+  display: block;
+  color: #9fb0c3;
+  font-size: 0.85rem;
+  margin-bottom: 6px;
+}
+
+.analytics-stat-card strong {
+  font-size: 1.1rem;
+}
+
+.chart-block {
+  margin-top: 18px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 16px;
+  padding: 14px;
+}
+
+.chart-block h3 {
+  margin: 0 0 10px 0;
+  font-size: 1rem;
+}
