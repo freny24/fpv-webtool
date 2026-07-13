@@ -1,3 +1,8 @@
+require("dotenv").config();
+
+const path = require("path");
+const fs = require("fs");
+
 function safeValue(v, fallback = null) {
   return v === undefined || v === null ? fallback : v;
 }
@@ -12,10 +17,48 @@ function firstNonEmpty(...vals) {
 const express = require("express");
 const cors = require("cors");
 const ee = require("@google/earthengine");
-const privateKey = JSON.parse(process.env.GEE_SERVICE_ACCOUNT_JSON);
+const { getSubmissionsRouter } = require("./submissions");
+
+// GEE credentials: prefer an env var (used in production/Render), fall back
+// to a local key file for local development.
+let privateKey;
+if (process.env.GEE_SERVICE_ACCOUNT_JSON) {
+  privateKey = JSON.parse(process.env.GEE_SERVICE_ACCOUNT_JSON);
+} else {
+  const keyPath = path.join(__dirname, "gee-service-account.json");
+  if (fs.existsSync(keyPath)) {
+    privateKey = JSON.parse(fs.readFileSync(keyPath, "utf8"));
+  } else {
+    throw new Error(
+      "Missing Earth Engine credentials: set GEE_SERVICE_ACCOUNT_JSON or provide server/gee-service-account.json"
+    );
+  }
+}
 
 const app = express();
-app.use(cors());
+
+// CORS: restrict to known origins in production via ALLOWED_ORIGINS
+// (comma-separated). Falls back to "allow all" for local dev.
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || "")
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+app.use(
+  cors(
+    allowedOrigins.length > 0
+      ? {
+          origin: (origin, callback) => {
+            if (!origin || allowedOrigins.includes(origin)) {
+              callback(null, true);
+            } else {
+              callback(new Error("Not allowed by CORS"));
+            }
+          },
+        }
+      : {}
+  )
+);
 app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
@@ -42,6 +85,13 @@ function eeObjectToPromise(obj) {
     });
   });
 }
+
+// -------------------- USER CONTRIBUTIONS --------------------
+
+app.use(
+  "/api/submissions",
+  getSubmissionsRouter({ ee, FPV_ASSET, eeObjectToPromise })
+);
 
 function initializeEarthEngine() {
   return new Promise((resolve, reject) => {

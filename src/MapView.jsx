@@ -12,7 +12,10 @@ import {
 import "leaflet/dist/leaflet.css";
 import FPVInfoPanel from "./components/FPVInfoPanel";
 import AnalyticsModal from "./components/AnalyticsModal";
+import ContributeModal from "./components/ContributeModal";
+import AdminPanel from "./components/AdminPanel";
 import L from "leaflet";
+import { API_BASE } from "./apiConfig";
 
 function ClickIdentify({ onIdentify }) {
   useMapEvents({
@@ -21,13 +24,13 @@ function ClickIdentify({ onIdentify }) {
 
       try {
         const res = await fetch(
-          `http://localhost:3001/api/fpv-identify?lat=${lat}&lng=${lng}`
+          `${API_BASE}/api/fpv-identify?lat=${lat}&lng=${lng}`
         );
 
         if (!res.ok) throw new Error(`Identify failed: ${res.status}`);
 
         const data = await res.json();
-        onIdentify(data);
+        onIdentify(data, { lat, lng });
       } catch (err) {
         console.error("Identify error:", err);
       }
@@ -92,6 +95,48 @@ function createCleanFPVIcon(isActive = false) {
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
   });
+}
+
+function createCommunityIcon() {
+  return L.divIcon({
+    className: "clean-fpv-marker",
+    html: `
+      <div style="
+        width:14px;
+        height:14px;
+        border-radius:50%;
+        background:#4ade80;
+        border:3px solid white;
+        box-shadow:0 3px 10px rgba(0,0,0,0.35);
+      "></div>
+    `,
+    iconSize: [14, 14],
+    iconAnchor: [7, 7],
+  });
+}
+
+function CommunityMarkers({ points }) {
+  return (
+    <>
+      {points.map((pt) => (
+        <Marker
+          key={`community-${pt.id}`}
+          position={[pt.lat, pt.lon]}
+          icon={createCommunityIcon()}
+        >
+          <Popup>
+            <strong>{pt.name || "Community-submitted site"}</strong>
+            <br />
+            {pt.country || "—"}
+            <br />
+            Source: {pt.source || "—"}
+            <br />
+            <em>Submitted by the community, approved by the FPV team.</em>
+          </Popup>
+        </Marker>
+      ))}
+    </>
+  );
 }
 
 function OverviewMarkers({ points, onSelect, selectedFPV }) {
@@ -228,6 +273,25 @@ export default function MapView({
   const [searching, setSearching] = useState(false);
   const [flyTarget, setFlyTarget] = useState(null);
 
+  const [pickedLocation, setPickedLocation] = useState(null);
+  const [showContribute, setShowContribute] = useState(false);
+  const [showAdmin, setShowAdmin] = useState(false);
+  const [communityPoints, setCommunityPoints] = useState([]);
+
+  async function loadCommunityPoints() {
+    try {
+      const res = await fetch(`${API_BASE}/api/submissions/approved`);
+      if (!res.ok) return;
+      const data = await res.json();
+      setCommunityPoints(data.submissions || []);
+    } catch (err) {
+      console.error("Community points load error:", err);
+    }
+  }
+
+  useEffect(() => {
+    loadCommunityPoints();
+  }, []);
 
   useEffect(() => {
     async function loadTiles() {
@@ -235,8 +299,8 @@ export default function MapView({
         setLoading(true);
 
         const [fpvRes, wbRes] = await Promise.all([
-          fetch("http://localhost:3001/api/fpv-tiles"),
-          fetch("http://localhost:3001/api/waterbody-tiles"),
+          fetch(`${API_BASE}/api/fpv-tiles`),
+          fetch(`${API_BASE}/api/waterbody-tiles`),
         ]);
 
         if (!fpvRes.ok) throw new Error(`FPV tiles failed: ${fpvRes.status}`);
@@ -268,7 +332,7 @@ export default function MapView({
   useEffect(() => {
     async function loadOverviewPoints() {
       try {
-        const res = await fetch("http://localhost:3001/api/fpv-overview");
+        const res = await fetch(`${API_BASE}/api/fpv-overview`);
 
         if (!res.ok) {
           throw new Error(`Overview points failed: ${res.status}`);
@@ -302,7 +366,7 @@ export default function MapView({
       try {
         setMetrics(null);
 
-        const url = `http://localhost:3001/api/fpv-metrics?wb_new_id=${encodeURIComponent(
+        const url = `${API_BASE}/api/fpv-metrics?wb_new_id=${encodeURIComponent(
           wbId
         )}&start=${startDate}&end=${endDate}`;
 
@@ -360,7 +424,7 @@ export default function MapView({
       setSearching(true);
 
       const res = await fetch(
-        `http://localhost:3001/api/fpv-search?q=${encodeURIComponent(
+        `${API_BASE}/api/fpv-search?q=${encodeURIComponent(
           searchQuery
         )}`
       );
@@ -434,13 +498,13 @@ export default function MapView({
 
     try {
       const res = await fetch(
-        `http://localhost:3001/api/fpv-identify?lat=${item.lat}&lng=${item.lon}`
+        `${API_BASE}/api/fpv-identify?lat=${item.lat}&lng=${item.lon}`
       );
 
       if (!res.ok) throw new Error(`Identify failed: ${res.status}`);
 
       const data = await res.json();
-      handleIdentifyResult(data);
+      handleIdentifyResult(data, { lat: item.lat, lng: item.lon });
     } catch (err) {
       console.error("Search select identify error:", err);
     }
@@ -455,17 +519,21 @@ export default function MapView({
 
     try {
       const res = await fetch(
-        `http://localhost:3001/api/fpv-identify?lat=${pt.lat}&lng=${pt.lon}`
+        `${API_BASE}/api/fpv-identify?lat=${pt.lat}&lng=${pt.lon}`
       );
 
       const data = await res.json();
-      handleIdentifyResult(data);
+      handleIdentifyResult(data, { lat: pt.lat, lng: pt.lon });
     } catch (err) {
       console.error("Overview point identify error:", err);
     }
   }
 
-  function handleIdentifyResult(data) {
+  function handleIdentifyResult(data, latlng) {
+    if (latlng) {
+      setPickedLocation(latlng);
+    }
+
     if (data?.found) {
       setSelectedFPV(data.fpv || null);
       setSelectedWaterbody(data.waterbody || null);
@@ -488,7 +556,7 @@ export default function MapView({
     if (!fpvId) return;
 
     window.open(
-      `http://localhost:3001/api/fpv-download?id=${encodeURIComponent(fpvId)}`,
+      `${API_BASE}/api/fpv-download?id=${encodeURIComponent(fpvId)}`,
       "_blank"
     );
   }
@@ -506,7 +574,7 @@ export default function MapView({
 }
 
     try {
-      const url = `http://localhost:3001/api/environmental-layer?wb_new_id=${encodeURIComponent(
+      const url = `${API_BASE}/api/environmental-layer?wb_new_id=${encodeURIComponent(
         wbId
       )}&layer=${vizLayer}&min=${vizMin}&max=${vizMax}&start=${startDate}&end=${endDate}`;
 
@@ -862,7 +930,43 @@ export default function MapView({
         >
           Environmental Insights
         </button>
+
+        <button
+          onClick={() => setShowContribute(true)}
+          style={{
+            border: "none",
+            borderRadius: 12,
+            padding: "12px 18px",
+            fontWeight: 700,
+            cursor: "pointer",
+            background: "#4ade80",
+            color: "#052e16",
+            boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
+          }}
+        >
+          + Contribute a Site
+        </button>
       </div>
+
+      <button
+        onClick={() => setShowAdmin(true)}
+        style={{
+          position: "absolute",
+          bottom: 20,
+          right: 20,
+          zIndex: 1200,
+          border: "1px solid rgba(255,255,255,0.15)",
+          borderRadius: 10,
+          padding: "8px 12px",
+          fontSize: 12,
+          fontWeight: 700,
+          cursor: "pointer",
+          background: "rgba(15,23,42,0.75)",
+          color: "#9fb0c3",
+        }}
+      >
+        Admin
+      </button>
 
       {showVizPanel && (
         <div
@@ -1080,6 +1184,8 @@ export default function MapView({
           selectedFPV={selectedFPV}
         />
 
+        <CommunityMarkers points={communityPoints} />
+
         <ClickIdentify onIdentify={handleIdentifyResult} />
         <FlyToSelection target={flyTarget} />
       </MapContainer>
@@ -1099,6 +1205,20 @@ export default function MapView({
         open={showAnalytics}
         onClose={() => setShowAnalytics(false)}
         metrics={metrics}
+      />
+
+      <ContributeModal
+        open={showContribute}
+        onClose={() => setShowContribute(false)}
+        initialLat={pickedLocation?.lat}
+        initialLon={pickedLocation?.lng}
+        onSubmitted={() => loadCommunityPoints()}
+      />
+
+      <AdminPanel
+        open={showAdmin}
+        onClose={() => setShowAdmin(false)}
+        onReviewed={() => loadCommunityPoints()}
       />
     </div>
   );
