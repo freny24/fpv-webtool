@@ -17,6 +17,7 @@ import AdminPanel from "./components/AdminPanel";
 import GlobalSearch from "./components/GlobalSearch";
 import GuideModal from "./components/GuideModal";
 import DownloadPanel from "./components/DownloadPanel";
+import ClimateLegend from "./components/ClimateLegend";
 import { zoneColor } from "./lib/search";
 import L from "leaflet";
 import { API_BASE } from "./apiConfig";
@@ -1534,6 +1535,20 @@ export default function MapView({
         initialLon={pickedLocation?.lng}
         onPreview={handlePreviewLocation}
         onSubmitted={() => loadCommunityPoints()}
+      />
+
+      <ClimateLegend
+        activeZone={climateFilter?.zone || null}
+        onSelectZone={(zone) =>
+          handleSelectClimate(
+            zone,
+            overviewPoints.filter((p) => p.climate_zone === zone)
+          )
+        }
+        onClear={() => {
+          setClimateFilter(null);
+          setFitPoints(null);
+        }}
       />
 
       <GuideModal open={showGuide} onClose={closeGuide} />
