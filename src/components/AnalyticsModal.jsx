@@ -10,7 +10,7 @@ import {
 } from "recharts";
 
 function showNumber(value, digits = 2, suffix = "") {
-  if (value === null || value === undefined || value === "") return "—";
+  if (value === null || value === undefined || value === "") return "Not available";
   const n = Number(value);
   if (Number.isNaN(n)) return String(value);
   return `${n.toFixed(digits)}${suffix}`;
@@ -43,10 +43,10 @@ export default function AnalyticsModal({ open, onClose, metrics }) {
 
   const geometryNote =
     typeof metrics?.geometry_note === "object"
-      ? `Sentinel-2: ${metrics?.geometry_note?.sentinel2 || "—"} | Landsat-8: ${
-          metrics?.geometry_note?.landsat8 || "—"
+      ? `Sentinel-2: ${metrics?.geometry_note?.sentinel2 || "Not available"} | Landsat-8: ${
+          metrics?.geometry_note?.landsat8 || "Not available"
         }`
-      : metrics?.geometry_note || "—";
+      : metrics?.geometry_note || "Not available";
 
   return (
     <div className="analytics-backdrop">

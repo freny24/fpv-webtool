@@ -18,6 +18,7 @@ const express = require("express");
 const cors = require("cors");
 const ee = require("@google/earthengine");
 const { getSubmissionsRouter } = require("./submissions");
+const climate = require("./climate");
 
 // GEE credentials: prefer an env var (used in production/Render), fall back
 // to a local key file for local development.
@@ -194,7 +195,7 @@ app.get("/api/fpv-identify", async (req, res) => {
     // Small buffer makes clicking easier on web map.
     const hit = fpv.filterBounds(pt.buffer(150)).first();
 
-    hit.evaluate((f, err) => {
+    hit.evaluate(async (f, err) => {
       if (err) {
         console.error("FPV identify error:", err);
         return res.status(500).json({ error: err.message || String(err) });
@@ -209,7 +210,7 @@ app.get("/api/fpv-identify", async (req, res) => {
       const wbRaw = firstNonEmpty(p.wb_new_id, p.wb_id, p.wb_ids, p.matched_wb);
       const wbId = wbRaw ? String(wbRaw).split(",")[0].trim() : null;
 
-      const fpvResponse = {
+      let fpvResponse = {
         fpv_new_id: safeValue(p.fpv_new_id),
         fpv_id: safeValue(p.id),
         id: safeValue(p.id),
@@ -223,10 +224,18 @@ app.get("/api/fpv-identify", async (req, res) => {
         wb_interse: safeValue(p.wb_interse),
       };
 
+      // Merge cached climate + waterbody name via the FPV's waterbody id.
+      fpvResponse = climate.enrichFpv(fpvResponse);
+
       if (!wbId) {
+        // No waterbody link: sample the Köppen raster directly at the point so
+        // the climate zone is still available in the panel / search.
+        const latN = Number(p.lat != null ? p.lat : lat);
+        const lonN = Number(p.lon != null ? p.lon : lng);
+        const clim = await climate.sampleClimateAt(latN, lonN);
         return res.json({
           found: true,
-          fpv: fpvResponse,
+          fpv: { ...fpvResponse, ...clim },
           waterbody: null,
         });
       }
@@ -251,6 +260,8 @@ app.get("/api/fpv-identify", async (req, res) => {
 
         const wbp = (wbf && wbf.properties) || null;
 
+        const wbClimate = climate.getWbInfo(wbId) || {};
+
         const waterbodyResponse = wbp
           ? {
               wb_new_id: safeValue(wbp.wb_new_id),
@@ -271,6 +282,10 @@ app.get("/api/fpv-identify", async (req, res) => {
               lake_type: safeValue(wbp.Lake_type),
               water_type: safeValue(wbp.WaterType),
               water_type2: safeValue(wbp.WaterType2),
+              koppen_code: safeValue(wbClimate.koppen_code),
+              koppen_label: safeValue(wbClimate.koppen_label),
+              koppen_5class: safeValue(wbClimate.koppen_5class),
+              climate_zone: safeValue(wbClimate.climate_zone),
             }
           : null;
 
@@ -319,9 +334,19 @@ app.get("/api/fpv-search", async (req, res) => {
     const fpvFc = ee.FeatureCollection(FPV_ASSET).limit(5000);
     const info = await eeObjectToPromise(fpvFc);
 
+    // If the query names a climate zone (e.g. "tropical", "arid"), match on the
+    // cached Köppen zone instead of the text haystack.
+    const zoneQuery = climate.matchClimateZone(q);
+
     const results = (info?.features || [])
       .map((f) => f.properties || {})
       .filter((p) => {
+        const wbInfo = climate.getWbInfo(p.wb_new_id) || {};
+
+        if (zoneQuery) {
+          return wbInfo.climate_zone === zoneQuery;
+        }
+
         const haystack = [
           p.fpv_new_id,
           p.id,
@@ -329,6 +354,9 @@ app.get("/api/fpv-search", async (req, res) => {
           p.state,
           p.city,
           p.wb_new_id,
+          wbInfo.lake_name,
+          wbInfo.koppen_label,
+          wbInfo.climate_zone,
         ]
           .filter(Boolean)
           .join(" ")
@@ -337,21 +365,28 @@ app.get("/api/fpv-search", async (req, res) => {
         return haystack.includes(q);
       })
       .slice(0, 12)
-      .map((p) => ({
-        id: p.fpv_new_id || p.id,
-        fpv_new_id: p.fpv_new_id || null,
-        wb_new_id: p.wb_new_id || null,
-        lat: p.lat,
-        lon: p.lon,
-        country: p.country,
-        state: p.state,
-        city: p.city,
-        label: `${p.fpv_new_id || p.id || "FPV"} • ${p.city || ""}, ${
-          p.state || ""
-        }, ${p.country || ""}`.trim(),
-      }));
+      .map((p) => {
+        const wbInfo = climate.getWbInfo(p.wb_new_id) || {};
+        return {
+          id: p.fpv_new_id || p.id,
+          fpv_new_id: p.fpv_new_id || null,
+          wb_new_id: p.wb_new_id || null,
+          lat: p.lat,
+          lon: p.lon,
+          country: p.country,
+          state: p.state,
+          city: p.city,
+          lake_name: wbInfo.lake_name || null,
+          fpv_cov: wbInfo.fpv_cov ?? null,
+          koppen_label: wbInfo.koppen_label || null,
+          climate_zone: wbInfo.climate_zone || null,
+          label: `${p.fpv_new_id || p.id || "FPV"} • ${p.city || ""}, ${
+            p.state || ""
+          }, ${p.country || ""}`.trim(),
+        };
+      });
 
-    res.json({ results });
+    res.json({ results, zone: zoneQuery || null });
   } catch (err) {
     console.error("fpv-search error:", err);
     res.status(500).json({ error: err.message || String(err) });
@@ -383,10 +418,22 @@ app.get("/api/fpv-overview", async (req, res) => {
 
     const result = await eeObjectToPromise(points.limit(5000));
 
+    // Attach cached waterbody name + coverage + Köppen climate so the frontend
+    // can run instant fuzzy search (incl. climate zones) without extra calls.
     res.json({
-      points: (result.features || []).map((f) => ({
-        ...f.properties,
-      })),
+      points: (result.features || []).map((f) => {
+        const p = f.properties || {};
+        const wbInfo = climate.getWbInfo(p.wb_new_id) || {};
+        return {
+          ...p,
+          lake_name: wbInfo.lake_name || null,
+          fpv_cov: p.fpv_cov ?? wbInfo.fpv_cov ?? null,
+          koppen_code: wbInfo.koppen_code ?? null,
+          koppen_label: wbInfo.koppen_label || null,
+          koppen_5class: wbInfo.koppen_5class || null,
+          climate_zone: wbInfo.climate_zone || null,
+        };
+      }),
     });
   } catch (err) {
     console.error("fpv-overview error:", err);

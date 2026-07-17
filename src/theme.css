@@ -1,0 +1,291 @@
+/* =============================================================================
+   Global FPV Dashboard — design system
+   A cohesive, premium "scientific instrument" theme: deep-space navy surfaces,
+   an azure/cyan accent, restrained solar amber, and real typography.
+   ========================================================================== */
+
+:root {
+  /* ---- Typography ---- */
+  --font-ui: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* ---- Surfaces (deep space navy) ---- */
+  --bg-0: #060b16;
+  --bg-1: #0a1120;
+  --bg-2: #0e1729;
+  --surface: rgba(12, 20, 37, 0.82);
+  --surface-solid: #0d1526;
+  --surface-2: rgba(255, 255, 255, 0.045);
+  --surface-3: rgba(255, 255, 255, 0.07);
+
+  /* ---- Lines ---- */
+  --border: rgba(148, 163, 184, 0.16);
+  --border-strong: rgba(148, 163, 184, 0.28);
+
+  /* ---- Text ---- */
+  --text: #e9eef7;
+  --text-dim: #9fb0c6;
+  --text-mut: #6f8199;
+
+  /* ---- Accents ---- */
+  --accent: #38bdf8;        /* azure — primary */
+  --accent-2: #22d3ee;      /* cyan */
+  --accent-soft: rgba(56, 189, 248, 0.14);
+  --accent-border: rgba(56, 189, 248, 0.4);
+  --solar: #fbbf24;         /* amber — FPV/solar, used sparingly */
+  --solar-soft: rgba(251, 191, 36, 0.14);
+  --success: #34d399;
+  --danger: #f87171;
+
+  /* ---- Radii ---- */
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 18px;
+  --r-xl: 22px;
+
+  /* ---- Elevation ---- */
+  --shadow-sm: 0 6px 16px rgba(2, 6, 16, 0.4);
+  --shadow-md: 0 14px 34px rgba(2, 6, 16, 0.45);
+  --shadow-lg: 0 24px 60px rgba(2, 6, 16, 0.55);
+  --glow-accent: 0 0 0 3px rgba(56, 189, 248, 0.18);
+
+  /* ---- Motion ---- */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  font-family: var(--font-ui);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background: var(--bg-0);
+}
+
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  background: #0a1120;
+  font-family: var(--font-ui);
+}
+
+/* Tabular figures for anything data-like */
+.mono,
+.leaflet-container .mono {
+  font-family: var(--font-mono);
+  font-feature-settings: "tnum" 1;
+  letter-spacing: -0.01em;
+}
+
+::selection {
+  background: rgba(56, 189, 248, 0.28);
+  color: #fff;
+}
+
+/* ---- Refined scrollbars ---- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.28) transparent;
+}
+*::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.22);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.4);
+  background-clip: content-box;
+}
+
+/* =============================================================================
+   Reusable UI primitives
+   ========================================================================== */
+
+/* Glass panel */
+.ui-panel {
+  background: linear-gradient(
+    155deg,
+    rgba(14, 23, 41, 0.9),
+    rgba(9, 16, 30, 0.86)
+  );
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: var(--text);
+}
+
+/* Section eyebrow label */
+.ui-eyebrow {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-mut);
+}
+
+/* Buttons ------------------------------------------------------------------ */
+.btn {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  border-radius: var(--r-md);
+  padding: 11px 16px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.12s var(--ease), background 0.18s var(--ease),
+    border-color 0.18s var(--ease), box-shadow 0.18s var(--ease),
+    color 0.18s var(--ease);
+}
+.btn:active {
+  transform: translateY(1px) scale(0.99);
+}
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.btn-primary {
+  background: linear-gradient(180deg, #45c6fb, #1fa9ec);
+  color: #04121f;
+  box-shadow: 0 8px 22px rgba(31, 169, 236, 0.32);
+}
+.btn-primary:not(:disabled):hover {
+  box-shadow: 0 10px 28px rgba(31, 169, 236, 0.45);
+  transform: translateY(-1px);
+}
+
+.btn-ghost {
+  background: var(--surface-2);
+  color: var(--text);
+  border-color: var(--border);
+}
+.btn-ghost:not(:disabled):hover {
+  background: var(--surface-3);
+  border-color: var(--border-strong);
+}
+
+.btn-solar {
+  background: var(--solar-soft);
+  color: var(--solar);
+  border-color: rgba(251, 191, 36, 0.35);
+}
+.btn-solar:not(:disabled):hover {
+  background: rgba(251, 191, 36, 0.2);
+}
+
+/* Segmented toggle */
+.seg-btn {
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  font-weight: 700;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 8px 12px;
+  cursor: pointer;
+  background: var(--surface-2);
+  color: var(--text-dim);
+  transition: all 0.16s var(--ease);
+}
+.seg-btn:hover {
+  background: var(--surface-3);
+  color: var(--text);
+}
+.seg-btn.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent-border);
+  box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.25);
+}
+
+/* Inputs */
+.ui-input {
+  font-family: var(--font-ui);
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.16s var(--ease), box-shadow 0.16s var(--ease);
+}
+.ui-input:focus {
+  border-color: var(--accent-border);
+  box-shadow: var(--glow-accent);
+}
+
+/* =============================================================================
+   Leaflet chrome — themed to match
+   ========================================================================== */
+.leaflet-control-zoom a {
+  background: var(--surface-solid) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  transition: background 0.15s var(--ease), color 0.15s var(--ease);
+}
+.leaflet-control-zoom a:hover {
+  background: #16233c !important;
+  color: var(--accent) !important;
+}
+.leaflet-bar {
+  border: none !important;
+  box-shadow: var(--shadow-sm) !important;
+  border-radius: var(--r-sm) !important;
+  overflow: hidden;
+}
+.leaflet-control-attribution {
+  background: rgba(6, 11, 22, 0.7) !important;
+  color: var(--text-mut) !important;
+  backdrop-filter: blur(6px);
+  border-radius: 8px 0 0 0;
+  font-size: 10px !important;
+}
+.leaflet-control-attribution a {
+  color: var(--text-dim) !important;
+}
+
+/* Popup theming (dark, glassy) */
+.leaflet-popup-content-wrapper {
+  background: var(--surface-solid) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--r-md) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+.leaflet-popup-tip {
+  background: var(--surface-solid) !important;
+  border: 1px solid var(--border) !important;
+}
+.leaflet-popup-content {
+  margin: 12px 14px !important;
+  color: var(--text) !important;
+}
+.leaflet-popup-close-button {
+  color: var(--text-mut) !important;
+}
+.leaflet-container a.leaflet-popup-close-button:hover {
+  color: var(--text) !important;
+}

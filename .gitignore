@@ -10,7 +10,16 @@ lerna-debug.log*
 node_modules
 dist
 server/gee-service-account.json
-server/data
+
+# Ignore everything in server/data (big rasters, runtime submissions)…
+server/data/*
+# …except the small climate cache, which the deployed server needs.
+!server/data/wb_cache.json
+
+# Throwaway local test scripts
+server/_geotest.mjs
+server/_rastercheck.mjs
+
 .env
 dist-ssr
 *.local

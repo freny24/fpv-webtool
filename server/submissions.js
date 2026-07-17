@@ -105,7 +105,7 @@ function getSubmissionsRouter({ ee, FPV_ASSET, eeObjectToPromise }) {
   // Public: submit a new FPV site.
   router.post("/", async (req, res) => {
     try {
-      const { lat, lon, name, country, source, notes } = req.body || {};
+      const { lat, lon, name, country, source, notes, email } = req.body || {};
 
       const latNum = Number(lat);
       const lonNum = Number(lon);
@@ -137,6 +137,12 @@ function getSubmissionsRouter({ ee, FPV_ASSET, eeObjectToPromise }) {
 
       const store = readStore();
 
+      // Optional contributor email (light validation — never blocks a submit).
+      const emailClean =
+        email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).trim())
+          ? String(email).trim()
+          : null;
+
       const record = {
         id: store.nextId,
         lat: latNum,
@@ -145,6 +151,7 @@ function getSubmissionsRouter({ ee, FPV_ASSET, eeObjectToPromise }) {
         country: country || null,
         source: String(source).trim(),
         notes: notes || null,
+        email: emailClean,
         status: "pending",
         duplicate_flag: duplicateNotes.length > 0,
         duplicate_note: duplicateNotes.length > 0 ? duplicateNotes.join("; ") : null,
@@ -230,6 +237,21 @@ function getSubmissionsRouter({ ee, FPV_ASSET, eeObjectToPromise }) {
 
     writeStore(store);
     res.json({ submission: record });
+  });
+
+  // Admin: permanently delete a submission (any status).
+  router.delete("/:id", requireAdmin, (req, res) => {
+    const id = Number(req.params.id);
+    const store = readStore();
+    const idx = store.records.findIndex((r) => r.id === id);
+
+    if (idx === -1) {
+      return res.status(404).json({ error: "Submission not found" });
+    }
+
+    const [removed] = store.records.splice(idx, 1);
+    writeStore(store);
+    res.json({ deleted: removed });
   });
 
   return router;

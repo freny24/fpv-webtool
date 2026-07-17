@@ -1,4 +1,5 @@
 import "./FPVInfoPanel.css";
+import { zoneColor } from "../lib/search";
 import {
   LineChart,
   Line,
@@ -9,14 +10,14 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-function showValue(value, fallback = "—") {
+function showValue(value, fallback = "Not available") {
   return value === null || value === undefined || value === ""
     ? fallback
     : String(value);
 }
 
 function showNumber(value, digits = 2, suffix = "") {
-  if (value === null || value === undefined || value === "") return "—";
+  if (value === null || value === undefined || value === "") return "Not available";
   const n = Number(value);
   if (Number.isNaN(n)) return String(value);
   return `${n.toFixed(digits)}${suffix}`;
@@ -44,11 +45,11 @@ function StatBox({ label, value }) {
   );
 }
 
-function DetailRow({ label, value }) {
+function DetailRow({ label, value, mono = false }) {
   return (
     <div className="detail-row">
       <span className="detail-label">{label}</span>
-      <span className="detail-value">{value}</span>
+      <span className={`detail-value${mono ? " mono" : ""}`}>{value}</span>
     </div>
   );
 }
@@ -97,6 +98,11 @@ export default function FPVInfoPanel({ fpv, waterbody, onClose }) {
   const wbType =
     waterbody?.Lake_type ?? waterbody?.lake_type ?? null;
 
+  const climateZone =
+    fpv?.climate_zone ?? waterbody?.climate_zone ?? null;
+  const koppenLabel =
+    fpv?.koppen_label ?? waterbody?.koppen_label ?? null;
+
   return (
     <div className="fpv-panel">
       <div className="fpv-panel-header">
@@ -116,6 +122,19 @@ export default function FPVInfoPanel({ fpv, waterbody, onClose }) {
         <span className="badge badge-blue">
           {showValue(lakeTypeLabel(wbType), "Waterbody")}
         </span>
+        {climateZone && (
+          <span
+            className="badge"
+            style={{
+              background: `${zoneColor(climateZone)}22`,
+              color: zoneColor(climateZone),
+              border: `1px solid ${zoneColor(climateZone)}55`,
+            }}
+          >
+            {climateZone}
+            {koppenLabel ? ` · ${koppenLabel}` : ""}
+          </span>
+        )}
       </div>
 
       <div className="section-title">Quick Summary</div>
@@ -143,18 +162,27 @@ export default function FPVInfoPanel({ fpv, waterbody, onClose }) {
         <DetailRow label="Country" value={showValue(fpv.country || waterbody?.country)} />
         <DetailRow label="State" value={showValue(fpv.state || waterbody?.state)} />
         <DetailRow label="City" value={showValue(fpv.city || waterbody?.city)} />
-        <DetailRow label="Latitude" value={showValue(fpv.lat)} />
-        <DetailRow label="Longitude" value={showValue(fpv.lon)} />
+        <DetailRow label="Latitude" value={showValue(fpv.lat)} mono />
+        <DetailRow label="Longitude" value={showValue(fpv.lon)} mono />
         <DetailRow label="Lake Name" value={showValue(wbName, "Not available")} />
+        <DetailRow
+          label="Climate Zone"
+          value={
+            climateZone
+              ? `${climateZone}${koppenLabel ? ` (${koppenLabel})` : ""}`
+              : "Not available"
+          }
+        />
       </div>
 
       <div className="section-title">Feature IDs</div>
       <div className="details-grid">
-        <DetailRow label="FPV ID" value={showValue(fpv.fpv_new_id)} />
-        <DetailRow label="Legacy FPV ID" value={showValue(fpv.fpv_id || fpv.id)} />
+        <DetailRow label="FPV ID" value={showValue(fpv.fpv_new_id)} mono />
+        <DetailRow label="Legacy FPV ID" value={showValue(fpv.fpv_id || fpv.id)} mono />
         <DetailRow
           label="Waterbody ID"
           value={showValue(fpv.wb_new_id || waterbody?.wb_new_id)}
+          mono
         />
       </div>
 

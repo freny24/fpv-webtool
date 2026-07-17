@@ -1,19 +1,8 @@
-html,
-body,
-#root {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  font-family: Inter, system-ui, Arial, sans-serif;
-}
-
-* {
-  box-sizing: border-box;
-}
+/* Base resets + typography + Leaflet theming live in theme.css.
+   Keep only app-specific overrides here. */
 
 .leaflet-container {
   width: 100%;
   height: 100%;
-  background: #dfe7ef;
+  background: var(--bg-1);
 }

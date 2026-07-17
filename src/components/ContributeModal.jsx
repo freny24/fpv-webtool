@@ -29,11 +29,12 @@ const labelStyle = {
   display: "block",
 };
 
-export default function ContributeModal({ open, onClose, initialLat, initialLon, onSubmitted }) {
+export default function ContributeModal({ open, onClose, initialLat, initialLon, onSubmitted, onPreview }) {
   const [lat, setLat] = useState("");
   const [lon, setLon] = useState("");
   const [name, setName] = useState("");
   const [country, setCountry] = useState("");
+  const [email, setEmail] = useState("");
   const [source, setSource] = useState(SOURCE_OPTIONS[0]);
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -46,13 +47,44 @@ export default function ContributeModal({ open, onClose, initialLat, initialLon,
     setLon(initialLon != null ? String(initialLon) : "");
     setName("");
     setCountry("");
+    setEmail("");
     setSource(SOURCE_OPTIONS[0]);
     setNotes("");
     setResult(null);
     setError(null);
   }, [open, initialLat, initialLon]);
 
+  // Live-preview the typed coordinates on the map (debounced) so the
+  // contributor can confirm the pin is on the right waterbody before submitting.
+  useEffect(() => {
+    if (!open) return;
+    const latNum = Number(lat);
+    const lonNum = Number(lon);
+    if (
+      lat === "" ||
+      lon === "" ||
+      Number.isNaN(latNum) ||
+      Number.isNaN(lonNum) ||
+      Math.abs(latNum) > 90 ||
+      Math.abs(lonNum) > 180
+    ) {
+      return;
+    }
+    const t = setTimeout(() => onPreview?.({ lat: latNum, lon: lonNum }), 500);
+    return () => clearTimeout(t);
+  }, [lat, lon, open, onPreview]);
+
   if (!open) return null;
+
+  const latNumLive = Number(lat);
+  const lonNumLive = Number(lon);
+  const coordsValid =
+    lat !== "" &&
+    lon !== "" &&
+    !Number.isNaN(latNumLive) &&
+    !Number.isNaN(lonNumLive) &&
+    Math.abs(latNumLive) <= 90 &&
+    Math.abs(lonNumLive) <= 180;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -77,6 +109,7 @@ export default function ContributeModal({ open, onClose, initialLat, initialLon,
           lon: lonNum,
           name: name.trim() || null,
           country: country.trim() || null,
+          email: email.trim() || null,
           source,
           notes: notes.trim() || null,
         }),
@@ -106,32 +139,25 @@ export default function ContributeModal({ open, onClose, initialLat, initialLon,
     <div
       style={{
         position: "fixed",
-        inset: 0,
+        top: 0,
+        right: 0,
+        bottom: 0,
+        width: 440,
+        maxWidth: "94vw",
         zIndex: 2000,
-        background: "rgba(0,0,0,0.55)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
+        overflowY: "auto",
+        background: "linear-gradient(160deg, rgba(14,23,41,0.97), rgba(9,16,30,0.96))",
+        color: "white",
+        borderLeft: "1px solid rgba(148,163,184,0.16)",
+        boxShadow: "-24px 0 60px rgba(2,6,16,0.55)",
+        backdropFilter: "blur(14px)",
+        WebkitBackdropFilter: "blur(14px)",
+        padding: 22,
+        boxSizing: "border-box",
       }}
-      onClick={onClose}
     >
-      <div
-        style={{
-          width: 440,
-          maxWidth: "90vw",
-          maxHeight: "85vh",
-          overflowY: "auto",
-          background: "linear-gradient(135deg, rgba(7,15,30,0.97), rgba(20,34,56,0.95))",
-          color: "white",
-          borderRadius: 18,
-          border: "1px solid rgba(255,255,255,0.1)",
-          boxShadow: "0 20px 50px rgba(0,0,0,0.4)",
-          padding: 22,
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-          <div style={{ fontSize: 18, fontWeight: 800 }}>Contribute an FPV Site</div>
+          <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: "-0.01em" }}>Contribute an FPV Site</div>
           <button
             onClick={onClose}
             style={{ background: "transparent", border: "none", color: "white", fontSize: 22, cursor: "pointer", lineHeight: 1 }}
@@ -158,7 +184,7 @@ export default function ContributeModal({ open, onClose, initialLat, initialLon,
                 marginBottom: 14,
               }}
             >
-              Thanks — your submission was received and is pending review.
+              Thanks! Your submission was received and is pending review.
             </div>
 
             {result.duplicate && (
@@ -196,7 +222,7 @@ export default function ContributeModal({ open, onClose, initialLat, initialLon,
           </div>
         ) : (
           <form onSubmit={handleSubmit}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 12 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 8 }}>
               <div>
                 <label style={labelStyle}>Latitude *</label>
                 <input
@@ -223,6 +249,51 @@ export default function ContributeModal({ open, onClose, initialLat, initialLon,
               </div>
             </div>
 
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 10,
+                marginBottom: 14,
+              }}
+            >
+              <span style={{ fontSize: 11.5, color: "#8798ad" }}>
+                {coordsValid
+                  ? "Pin shown on the map. Check it's the right waterbody."
+                  : "Enter coordinates to preview the spot on the map."}
+              </span>
+              <button
+                type="button"
+                disabled={!coordsValid}
+                onClick={() =>
+                  onPreview?.({ lat: Number(lat), lon: Number(lon) })
+                }
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  border: "1px solid rgba(56,189,248,0.4)",
+                  background: coordsValid
+                    ? "rgba(56,189,248,0.14)"
+                    : "rgba(255,255,255,0.05)",
+                  color: coordsValid ? "#7dd3fc" : "#64748b",
+                  borderRadius: 8,
+                  padding: "6px 11px",
+                  fontSize: 11.5,
+                  fontWeight: 700,
+                  cursor: coordsValid ? "pointer" : "not-allowed",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M12 21s-7-6.3-7-11a7 7 0 0 1 14 0c0 4.7-7 11-7 11Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                  <circle cx="12" cy="10" r="2.5" stroke="currentColor" strokeWidth="2" />
+                </svg>
+                Preview on map
+              </button>
+            </div>
+
             <div style={{ marginBottom: 12 }}>
               <label style={labelStyle}>Site name (optional)</label>
               <input style={inputStyle} type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Ramagundam FPV" />
@@ -231,6 +302,20 @@ export default function ContributeModal({ open, onClose, initialLat, initialLon,
             <div style={{ marginBottom: 12 }}>
               <label style={labelStyle}>Country (optional)</label>
               <input style={inputStyle} type="text" value={country} onChange={(e) => setCountry(e.target.value)} placeholder="e.g. India" />
+            </div>
+
+            <div style={{ marginBottom: 12 }}>
+              <label style={labelStyle}>Your email (optional)</label>
+              <input
+                style={inputStyle}
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="So the team can thank you or follow up"
+              />
+              <div style={{ fontSize: 11, color: "#7c8ba1", marginTop: 5 }}>
+                Only used to credit or contact you about this submission, and never shown publicly.
+              </div>
             </div>
 
             <div style={{ marginBottom: 12 }}>
@@ -306,7 +391,6 @@ export default function ContributeModal({ open, onClose, initialLat, initialLon,
             </div>
           </form>
         )}
-      </div>
     </div>
   );
 }

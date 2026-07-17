@@ -1,0 +1,222 @@
+/* GlobalSearch — premium scientific search styling ------------------------ */
+
+.gsearch {
+  position: relative;
+  width: 100%;
+}
+
+.gsearch-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.gsearch-field:focus-within {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(56, 189, 248, 0.7);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
+}
+
+.gsearch-icon {
+  flex: 0 0 auto;
+  color: #7f96b3;
+  display: flex;
+  transition: color 0.2s ease;
+}
+.gsearch-field:focus-within .gsearch-icon {
+  color: #38bdf8;
+}
+
+.gsearch-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #fff;
+  font-size: 14px;
+  letter-spacing: 0.1px;
+}
+.gsearch-input::placeholder {
+  color: #6b7d94;
+}
+
+.gsearch-spinner {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 2px solid rgba(56, 189, 248, 0.25);
+  border-top-color: #38bdf8;
+  animation: gsearch-spin 0.7s linear infinite;
+}
+
+.gsearch-clear {
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: #b9c6d8;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.gsearch-clear:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
+@keyframes gsearch-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ---- Dropdown ---- */
+.gsearch-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 1400;
+  max-height: 340px;
+  overflow-y: auto;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(13, 22, 40, 0.98), rgba(9, 16, 30, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(14px);
+  animation: gsearch-pop 0.16s ease-out;
+  overscroll-behavior: contain;
+}
+
+@keyframes gsearch-pop {
+  from { opacity: 0; transform: translateY(-6px) scale(0.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.gsearch-hint,
+.gsearch-empty {
+  padding: 13px 15px;
+  font-size: 12.5px;
+  color: #8798ad;
+  line-height: 1.5;
+}
+
+.gsearch-group-label {
+  padding: 9px 15px 5px;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+  color: #6b7d94;
+}
+
+.gsearch-item {
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  color: #fff;
+  padding: 11px 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.12s ease;
+}
+.gsearch-item:last-child { border-bottom: none; }
+.gsearch-item:hover,
+.gsearch-item.active {
+  background: rgba(56, 189, 248, 0.12);
+}
+.gsearch-item.active {
+  box-shadow: inset 3px 0 0 #38bdf8;
+}
+
+.gsearch-item-badge {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  background: rgba(56, 189, 248, 0.14);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+}
+.gsearch-item-badge.coordinate {
+  background: rgba(250, 204, 21, 0.14);
+  border-color: rgba(250, 204, 21, 0.3);
+}
+
+.gsearch-item-body {
+  flex: 1;
+  min-width: 0;
+}
+.gsearch-item-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gsearch-item-sub {
+  font-size: 11.5px;
+  color: #9fb0c3;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gsearch-item-title mark,
+.gsearch-item-sub mark {
+  background: rgba(250, 204, 21, 0.28);
+  color: #fde68a;
+  border-radius: 3px;
+  padding: 0 1px;
+}
+
+.gsearch-item-meta {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.gsearch-chip {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+.gsearch-chip.coverage {
+  background: rgba(148, 163, 184, 0.14);
+  color: #cbd5e1;
+  border-color: rgba(148, 163, 184, 0.22);
+}
+
+/* Climate group row */
+.gsearch-item.climate .gsearch-item-badge {
+  font-weight: 800;
+  font-size: 13px;
+}
+
+/* Scrollbar */
+.gsearch-dropdown::-webkit-scrollbar { width: 8px; }
+.gsearch-dropdown::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+}
