@@ -200,16 +200,10 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for the full Vercel + Render walkthrough, i
 
 **Freny Reji** – Graduate DS Research Assistant
 
-* Designed and implemented the Google Earth Engine raster processing pipeline
-* Developed the chlorophyll-a (NDCI) computation workflow and built the dynamic WST time-series range composite logic
-* Built the React (Vite) frontend interface and UI component system
-* Architected the global intelligent search (fuzzy autocomplete across FPV ID, country, state, city, waterbody, coordinates, and climate zone, with keyboard navigation and match highlighting)
-* Integrated Köppen–Geiger climate classification: built a raster-sampling pipeline (Beck et al., 2018) that tags every waterbody with its climate zone, enabling climate-based search and analysis
-* Redesigned the full UI/UX into a premium scientific dashboard (design-token system, typography, dark theme, animated scientific markers, responsive layout)
-* Designed and implemented the community contribution system: public submission form with live map preview, spatial duplicate detection, and a secure admin review queue (approve / reject / delete) with optional contributor email
-* Built filtered dataset export (by climate zone and country; CSV and GeoJSON)
-* Added an onboarding guide and performance optimizations (memoized map rendering)
-* Deployed the application publicly (Vercel frontend + Render backend) and authored the hosting and cost analysis
+* Designed and implemented the Google Earth Engine raster processing pipeline, including the chlorophyll-a (NDCI) workflow and the dynamic WST time-series composite logic
+* Built and redesigned the React (Vite) frontend into a premium scientific dashboard (component system, design tokens, dark theme, animated markers, onboarding guide)
+* Architected the global intelligent search and integrated Köppen–Geiger climate classification — a raster-sampling pipeline (Beck et al., 2018) that tags every waterbody with its climate zone to enable climate-based search
+* Designed and implemented the community contribution system (submission form with live map preview, spatial duplicate detection, secure admin review queue) and filtered dataset export (CSV/GeoJSON)
 
 **Sakshi Nair** – Graduate DS Research Assistant
 
