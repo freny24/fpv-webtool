@@ -4,7 +4,7 @@ A research-driven geospatial web application for exploring the global distributi
 
 This project integrates **Google Earth Engine (GEE)** as a geospatial processing backend and **React (Vite)** as a frontend interface to enable interactive analysis of chlorophyll-a concentration, water surface temperature (WST), and climate context across FPV-associated water bodies worldwide. It is designed as the first public, interactive dashboard for global floating solar.
 
-🌐 **Live application:** https://fpv-webtool.vercel.app
+🌐 **Live application:** https://fpv-webtool.vercel.app (Render's free tier spins down after inactivity, so the first request after idle time can take ~30–60s (cold start))
 
 ---
 
