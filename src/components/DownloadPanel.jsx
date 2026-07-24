@@ -98,7 +98,7 @@ export default function DownloadPanel({ open, onClose, points = [] }) {
           <div className="ui-eyebrow" style={{ display: "block", marginBottom: 4 }}>
             Export Dataset
           </div>
-          <div style={{ fontWeight: 800, fontSize: 16 }}>Download FPV Data</div>
+          <div style={{ fontWeight: 800, fontSize: 16 }}>Download WSPV Data</div>
         </div>
         <button
           onClick={onClose}

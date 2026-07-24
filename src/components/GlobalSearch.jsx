@@ -171,7 +171,7 @@ export default function GlobalSearch({
         <input
           className="gsearch-input"
           type="text"
-          placeholder="Search FPV ID, country, city, waterbody, climate, or lat, lon"
+          placeholder="Search WSPV ID, country, city, waterbody, climate, or lat, lon"
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
@@ -179,7 +179,7 @@ export default function GlobalSearch({
           }}
           onFocus={() => setOpen(true)}
           onKeyDown={onKeyDown}
-          aria-label="Search the global FPV dataset"
+          aria-label="Search the global WSPV dataset"
           aria-expanded={showDropdown}
           role="combobox"
           aria-controls="gsearch-listbox"
@@ -221,7 +221,7 @@ export default function GlobalSearch({
             points.length > 0 &&
             !(local.mode === "climate" && !climateReady) && (
             <div className="gsearch-empty">
-              No matches for “{query.trim()}”. Try an FPV ID, country, city,
+              No matches for “{query.trim()}”. Try a WSPV ID, country, city,
               waterbody, climate zone, or “lat, lon”.
             </div>
           )}
@@ -290,7 +290,7 @@ function ResultRow({ item, query, active, onMouseEnter, onClick }) {
         <span className="gsearch-item-body">
           <span className="gsearch-item-title">All {item.zone} sites</span>
           <span className="gsearch-item-sub">
-            {item.count} FPV site{item.count === 1 ? "" : "s"} in this climate
+            {item.count} WSPV site{item.count === 1 ? "" : "s"} in this climate
             zone
           </span>
         </span>
@@ -327,7 +327,7 @@ function ResultRow({ item, query, active, onMouseEnter, onClick }) {
       <span className="gsearch-item-badge">☀</span>
       <span className="gsearch-item-body">
         <span className="gsearch-item-title">
-          <Highlighted text={item.fpv_new_id || item.id || "FPV site"} query={query} />
+          <Highlighted text={item.fpv_new_id || item.id || "WSPV site"} query={query} />
         </span>
         <span className="gsearch-item-sub">
           <Highlighted text={sub || "Location unavailable"} query={query} />

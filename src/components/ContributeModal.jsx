@@ -157,7 +157,7 @@ export default function ContributeModal({ open, onClose, initialLat, initialLon,
       }}
     >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-          <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: "-0.01em" }}>Contribute an FPV Site</div>
+          <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: "-0.01em" }}>Contribute a WSPV Site</div>
           <button
             onClick={onClose}
             style={{ background: "transparent", border: "none", color: "white", fontSize: 22, cursor: "pointer", lineHeight: 1 }}
@@ -167,7 +167,7 @@ export default function ContributeModal({ open, onClose, initialLat, initialLon,
         </div>
 
         <div style={{ fontSize: 13, color: "#b9c6d8", marginBottom: 18 }}>
-          Know a floating solar site that's missing from the map? Submit it below.
+          Know a water-surface solar site that's missing from the map? Submit it below.
           Every submission is reviewed by the team before it appears publicly.
         </div>
 
@@ -296,7 +296,7 @@ export default function ContributeModal({ open, onClose, initialLat, initialLon,
 
             <div style={{ marginBottom: 12 }}>
               <label style={labelStyle}>Site name (optional)</label>
-              <input style={inputStyle} type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Ramagundam FPV" />
+              <input style={inputStyle} type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Ramagundam WSPV" />
             </div>
 
             <div style={{ marginBottom: 12 }}>

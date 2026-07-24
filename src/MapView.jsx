@@ -175,7 +175,7 @@ function CommunityMarkers({ points }) {
             <br />
             Source: {pt.source || "Unknown"}
             <br />
-            <em>Submitted by the community, approved by the FPV team.</em>
+            <em>Submitted by the community, approved by the WSPV team.</em>
           </Popup>
         </Marker>
       ))}
@@ -205,7 +205,7 @@ const OverviewMarker = memo(function OverviewMarker({ pt, isActive, onSelect }) 
     >
       <Popup>
         <div className="fpv-popup">
-          <strong>{pt.fpv_new_id || pt.id || "FPV Site"}</strong>
+          <strong>{pt.fpv_new_id || pt.id || "WSPV Site"}</strong>
           <div className="fpv-popup-loc">
             {pt.city || "Unknown"} • {pt.state || "Unknown"} • {pt.country || "Unknown"}
           </div>
@@ -226,7 +226,7 @@ const OverviewMarker = memo(function OverviewMarker({ pt, isActive, onSelect }) 
           )}
           <div className="fpv-popup-row">WB ID: {pt.wb_new_id || "Unknown"}</div>
           <div className="fpv-popup-row">
-            FPV area:{" "}
+            WSPV area:{" "}
             {pt.fpv_area_k ? `${Number(pt.fpv_area_k).toFixed(2)} km²` : "Not available"}
           </div>
         </div>
@@ -682,7 +682,7 @@ export default function MapView({
     const wbId = selectedWaterbody?.wb_new_id || selectedFPV?.wb_new_id;
 
     if (!wbId) {
-      alert("Please click/select an FPV site first.");
+      alert("Please click/select a WSPV site first.");
       return;
     }
     if (!startDate || !endDate || new Date(endDate) <= new Date(startDate)) {
@@ -896,7 +896,7 @@ export default function MapView({
           />
           <span>
             Showing <strong>{displayedPoints.length}</strong>{" "}
-            <strong>{climateFilter.zone}</strong> FPV sites
+            <strong>{climateFilter.zone}</strong> WSPV sites
           </span>
           <button
             onClick={() => {
@@ -976,7 +976,7 @@ export default function MapView({
                 lineHeight: 1.1,
               }}
             >
-              Global FPV Dashboard
+              Global WSPV Dashboard
             </div>
             <div
               style={{
@@ -988,7 +988,7 @@ export default function MapView({
                 textTransform: "uppercase",
               }}
             >
-              Floating Photovoltaic Observatory
+              Water Surface Photovoltaic Observatory
             </div>
           </div>
         </div>
@@ -1000,8 +1000,8 @@ export default function MapView({
             lineHeight: 1.4,
           }}
         >
-          Explore floating solar installations, waterbody metrics, and climate
-          zones worldwide.
+          Explore water-surface solar installations, waterbody metrics, and
+          climate zones worldwide.
         </div>
       </div>
 
@@ -1156,7 +1156,7 @@ export default function MapView({
             active={showFPVLayer}
             onClick={() => setShowFPVLayer((v) => !v)}
           >
-            FPV
+            WSPV
           </ToggleButton>
 
           <ToggleButton

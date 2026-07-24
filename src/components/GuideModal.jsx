@@ -5,7 +5,7 @@ const STEPS = [
     icon: "☀",
     color: "#fbbf24",
     title: "What is this?",
-    body: "The world's first public dashboard for global Floating Photovoltaics (FPV). These are solar panels that float on lakes and reservoirs. Every yellow node on the map is a real floating-solar installation, mapped from satellite imagery.",
+    body: "The world's first public dashboard for global Water Surface Photovoltaics (WSPV): solar panels installed over water. This covers floating solar on lakes and reservoirs as well as pile-mounted panels over shallow aquaculture ponds. Every yellow node on the map is a real installation, mapped from satellite imagery.",
   },
   {
     icon: "🛰",
@@ -17,19 +17,19 @@ const STEPS = [
     icon: "🌍",
     color: "#34d399",
     title: "Climate intelligence",
-    body: "Every site is tagged with its Köppen climate zone (Tropical, Arid, Temperate, Cold, or Polar), sampled from a global climate raster. Search a zone to instantly see where floating solar is deployed across different climates.",
+    body: "Every site is tagged with its Köppen climate zone (Tropical, Arid, Temperate, Cold, or Polar), sampled from a global climate raster. Search a zone to instantly see where water-surface solar is deployed across different climates.",
   },
   {
     icon: "🔍",
     color: "#a78bfa",
     title: "How to explore",
-    body: "Use the search bar to jump to an FPV ID, country, city, waterbody, climate zone, or raw coordinates. Click any site for its full profile, or open Environmental Insights to see water-quality trends before and after the panels were installed.",
+    body: "Use the search bar to jump to a WSPV ID, country, city, waterbody, climate zone, or raw coordinates. Click any site for its full profile, or open Environmental Insights to see water-quality trends before and after the panels were installed.",
   },
   {
     icon: "🌱",
     color: "#4ade80",
     title: "Why it matters",
-    body: "Floating solar generates clean energy without taking farmland, and can reduce evaporation and algal blooms. Researchers, NGOs, and planners use this to study its real environmental impact and find the best places to build next. You can also add sites we've missed using “Contribute a Site.”",
+    body: "Water-surface solar generates clean energy without taking farmland, and can reduce evaporation and algal blooms. Researchers, NGOs, and planners use this to study its real environmental impact and find the best places to build next. You can also add sites we've missed using “Contribute a Site.”",
   },
 ];
 
@@ -84,7 +84,7 @@ export default function GuideModal({ open, onClose }) {
               Welcome
             </div>
             <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: "-0.02em" }}>
-              Global FPV Dashboard
+              Global WSPV Dashboard
             </div>
           </div>
           <button
