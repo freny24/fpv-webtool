@@ -237,6 +237,14 @@ body {
   box-shadow: var(--glow-accent);
 }
 
+/* Native dropdown lists: force a dark background so option text (which is
+   light in this theme) is readable instead of white-on-white. */
+select option,
+option {
+  background-color: var(--surface-solid);
+  color: var(--text);
+}
+
 /* =============================================================================
    Leaflet chrome — themed to match
    ========================================================================== */
