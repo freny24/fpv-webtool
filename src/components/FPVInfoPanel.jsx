@@ -200,8 +200,29 @@ export default function FPVInfoPanel({ fpv, waterbody, onClose }) {
             <DetailRow label="HydroLAKES ID" value={showValue(waterbody.hylak_id || waterbody.Hylak_id)} />
             <DetailRow label="WB Latitude" value={showValue(waterbody.lat)} />
             <DetailRow label="WB Longitude" value={showValue(waterbody.lon)} />
-            <DetailRow label="FPV Count in WB" value={showValue(waterbody.n_fpv)} />
+            <DetailRow label="WSPV Count in WB" value={showValue(waterbody.n_fpv)} />
             <DetailRow label="WSPV IDs in WB" value={showValue(waterbody.fpv_ids)} />
+          </div>
+        </>
+      )}
+
+      {fpv.id !== "custom-location" && (
+        <>
+          <div className="section-title">Data Notes</div>
+          <div className="data-note">
+            <span className="data-note-title">Imagery may be outdated.</span>{" "}
+            Some installations may not appear on the background satellite imagery.
+            Basemap tiles update irregularly and are often 1 to 3 years old, so
+            absence from the basemap is not evidence that the installation does
+            not exist.
+          </div>
+          <div className="data-note">
+            <span className="data-note-title">Polygon is a snapshot.</span> Each
+            polygon shows the installation's extent on the date it was digitized.
+            Installations are dynamic: panels are added, arrays shift with wind
+            and water level, and some systems are partially or fully removed.
+            Treat the polygon as the footprint at digitization time, not the
+            current footprint.
           </div>
         </>
       )}
