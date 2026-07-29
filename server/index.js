@@ -968,13 +968,27 @@ app.get("/api/sentinel-layer", async (req, res) => {
       return res.status(400).json({ error: "start and end are required" });
     }
 
-    // Cloud-filtered Sentinel-2 surface reflectance, median composite over the
-    // selected window (median naturally suppresses residual clouds).
+    // Per-pixel cloud/shadow/cirrus mask using the Scene Classification band
+    // (SCL). Removing bad pixels *before* compositing is what turns the muddy
+    // blur into a clean image.
+    const maskS2 = (img) => {
+      const scl = img.select("SCL");
+      const clear = scl
+        .neq(3) // cloud shadow
+        .and(scl.neq(8)) // cloud, medium probability
+        .and(scl.neq(9)) // cloud, high probability
+        .and(scl.neq(10)); // thin cirrus
+      return img.updateMask(clear).copyProperties(img, ["system:time_start"]);
+    };
+
     const col = ee
       .ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
       .filterDate(start, end)
-      .filter(ee.Filter.lt("CLOUDY_PIXEL_PERCENTAGE", 40));
+      .filter(ee.Filter.lt("CLOUDY_PIXEL_PERCENTAGE", 60))
+      .map(maskS2);
 
+    // Median of the cloud-masked stack = a clean, cloud-free composite for the
+    // selected window.
     const composite = col.median();
 
     // True colour: B4/B3/B2. SWIR false colour: B11/B12/B8A (panels stand out).
