@@ -43,9 +43,45 @@ export function matchClimateZone(query) {
 // ---- Coordinate parsing ---------------------------------------------------
 const NUM = /^-?\d+(\.\d+)?$/;
 
+// Matches one DMS component, e.g. 23°43'11.04"S  (minutes/seconds optional).
+const DMS_RE =
+  /(\d+(?:\.\d+)?)\s*°\s*(?:(\d+(?:\.\d+)?)\s*['′]\s*)?(?:(\d+(?:\.\d+)?)\s*["″]?\s*)?([NSEWnsew])/g;
+
+function dmsToDecimal(deg, min, sec, hemi) {
+  let dec =
+    Number(deg) + (Number(min) || 0) / 60 + (Number(sec) || 0) / 3600;
+  const h = String(hemi).toUpperCase();
+  if (h === "S" || h === "W") dec = -dec;
+  return { dec, axis: h === "N" || h === "S" ? "lat" : "lon" };
+}
+
+// Parse degrees/minutes/seconds pairs like: 23°43'11.04"S 46°43'57.46"W
+export function parseDMSQuery(query) {
+  const q = String(query || "");
+  if (!q.includes("°") || !/[NSEW]/i.test(q)) return null;
+
+  const matches = [...q.matchAll(DMS_RE)];
+  if (matches.length < 2) return null;
+
+  let lat = null;
+  let lon = null;
+  for (const m of matches.slice(0, 2)) {
+    const { dec, axis } = dmsToDecimal(m[1], m[2], m[3], m[4]);
+    if (axis === "lat") lat = dec;
+    else lon = dec;
+  }
+  if (lat === null || lon === null) return null;
+  if (Math.abs(lat) > 90 || Math.abs(lon) > 180) return null;
+  return { kind: "latlon", lat, lon };
+}
+
 export function parseCoordinateQuery(query) {
   const q = String(query || "").trim();
   if (!q) return null;
+
+  // Degrees/minutes/seconds (e.g. copy-pasted from Google Earth)
+  const dms = parseDMSQuery(q);
+  if (dms) return dms;
 
   // "lat, lon" pair
   if (q.includes(",")) {

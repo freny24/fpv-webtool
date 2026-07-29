@@ -345,6 +345,10 @@ export default function MapView({
   const [vizOpacity, setVizOpacity] = useState(0.75);
   const [environmentTileUrl, setEnvironmentTileUrl] = useState(null);
 
+  const [s2Mode, setS2Mode] = useState(null); // null | "truecolor" | "swir"
+  const [s2TileUrl, setS2TileUrl] = useState(null);
+  const [s2Loading, setS2Loading] = useState(false);
+
   const [countryGeoJson, setCountryGeoJson] = useState(null);
   const [highlightedCountry, setHighlightedCountry] = useState(null);
 
@@ -514,6 +518,41 @@ export default function MapView({
       ignore = true;
     };
   }, [selectedFPV, selectedWaterbody, startDate, endDate]);
+
+  // Load the Sentinel-2 imagery tile layer for the current date window + mode.
+  useEffect(() => {
+    let ignore = false;
+
+    if (!s2Mode) {
+      setS2TileUrl(null);
+      return;
+    }
+    if (!startDate || !endDate || new Date(endDate) <= new Date(startDate)) {
+      return;
+    }
+
+    async function loadS2() {
+      try {
+        setS2Loading(true);
+        const res = await fetch(
+          `${API_BASE}/api/sentinel-layer?start=${startDate}&end=${endDate}&mode=${s2Mode}`
+        );
+        if (!res.ok) throw new Error(`Sentinel layer failed: ${res.status}`);
+        const data = await res.json();
+        if (!ignore) setS2TileUrl(data.tileUrl);
+      } catch (err) {
+        console.error("Sentinel-2 load error:", err);
+        if (!ignore) setS2TileUrl(null);
+      } finally {
+        if (!ignore) setS2Loading(false);
+      }
+    }
+
+    loadS2();
+    return () => {
+      ignore = true;
+    };
+  }, [s2Mode, startDate, endDate]);
 
   const displayedPoints = useMemo(() => {
     if (!climateFilter) return overviewPoints;
@@ -1173,6 +1212,52 @@ export default function MapView({
             Metric Viz
           </ToggleButton>
         </div>
+
+        <div
+          className="ui-eyebrow"
+          style={{ display: "block", marginTop: 20, marginBottom: 8 }}
+        >
+          Sentinel-2 Imagery
+        </div>
+
+        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+          <ToggleButton
+            active={s2Mode === "truecolor"}
+            onClick={() =>
+              setS2Mode((c) => (c === "truecolor" ? null : "truecolor"))
+            }
+          >
+            True Color
+          </ToggleButton>
+          <ToggleButton
+            active={s2Mode === "swir"}
+            onClick={() => setS2Mode((c) => (c === "swir" ? null : "swir"))}
+          >
+            SWIR
+          </ToggleButton>
+          {s2Loading && <span className="gsearch-spinner" aria-hidden="true" />}
+        </div>
+
+        {s2Mode && (
+          <div
+            style={{
+              marginTop: 10,
+              padding: "9px 11px",
+              borderRadius: 8,
+              background: "rgba(251,191,36,0.08)",
+              border: "1px solid rgba(251,191,36,0.25)",
+              color: "#fcd9a0",
+              fontSize: 11,
+              lineHeight: 1.5,
+            }}
+          >
+            Sentinel-2 {s2Mode === "swir" ? "SWIR false colour" : "true colour"},
+            10 m pixels, for the selected date window. An array of 0.1 ha covers
+            roughly 3×3 pixels, so small installations may appear as a few
+            indistinct dark pixels or not at all. Absence from this image is not
+            evidence of absence on the ground.
+          </div>
+        )}
       </div>
 
       <div
@@ -1406,6 +1491,14 @@ export default function MapView({
           <TileLayer
             attribution="Tiles © Esri"
             url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+          />
+        )}
+
+        {s2Mode && s2TileUrl && (
+          <TileLayer
+            key={`s2-${s2Mode}`}
+            url={s2TileUrl}
+            attribution="Contains modified Copernicus Sentinel data"
           />
         )}
 

@@ -956,6 +956,46 @@ app.get("/api/fpv-download", async (req, res) => {
   }
 });
 
+// -------------------- SENTINEL-2 IMAGERY --------------------
+
+app.get("/api/sentinel-layer", async (req, res) => {
+  try {
+    const start = req.query.start;
+    const end = req.query.end;
+    const mode = String(req.query.mode || "truecolor");
+
+    if (!start || !end) {
+      return res.status(400).json({ error: "start and end are required" });
+    }
+
+    // Cloud-filtered Sentinel-2 surface reflectance, median composite over the
+    // selected window (median naturally suppresses residual clouds).
+    const col = ee
+      .ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
+      .filterDate(start, end)
+      .filter(ee.Filter.lt("CLOUDY_PIXEL_PERCENTAGE", 40));
+
+    const composite = col.median();
+
+    // True colour: B4/B3/B2. SWIR false colour: B11/B12/B8A (panels stand out).
+    const visParams =
+      mode === "swir"
+        ? { bands: ["B11", "B12", "B8A"], min: 100, max: 3500 }
+        : { bands: ["B4", "B3", "B2"], min: 0, max: 3000 };
+
+    composite.getMap(visParams, (mapInfo, err) => {
+      if (err) {
+        console.error("sentinel-layer error:", err);
+        return res.status(500).json({ error: err.message || String(err) });
+      }
+      res.json({ tileUrl: mapInfo.urlFormat });
+    });
+  } catch (err) {
+    console.error("sentinel-layer route failed:", err);
+    res.status(500).json({ error: err.message || String(err) });
+  }
+});
+
 // -------------------- START SERVER --------------------
 
 initializeEarthEngine()
