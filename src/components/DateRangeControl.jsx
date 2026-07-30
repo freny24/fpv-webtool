@@ -29,24 +29,11 @@ export default function DateRangeControl({
 
   const years = [];
   for (let y = currentYear; y >= MIN_YEAR; y--) years.push(y);
-  const chipYears = years.slice(0, 5); // current year + previous four
 
   const start = parse(startDate);
   const end = parse(endDate);
   const invalid =
     startDate && endDate && new Date(endDate) <= new Date(startDate);
-
-  function setYearPreset(y) {
-    setStartDate(toISO(y, 1, 1));
-    setEndDate(y === currentYear ? todayISO() : toISO(y, 12, 31));
-  }
-
-  function setLast12Months() {
-    const s = new Date(now);
-    s.setFullYear(now.getFullYear() - 1);
-    setStartDate(s.toISOString().slice(0, 10));
-    setEndDate(todayISO());
-  }
 
   function onStartChange(y, m) {
     setStartDate(toISO(y, m, 1));
@@ -57,17 +44,6 @@ export default function DateRangeControl({
     const last = toISO(y, m, lastDayOfMonth(y, m));
     setEndDate(last > todayISO() ? todayISO() : last);
   }
-
-  const isYearActive = (y) =>
-    startDate === toISO(y, 1, 1) &&
-    (endDate === toISO(y, 12, 31) ||
-      (y === currentYear && endDate === todayISO()));
-
-  const isLast12Active = (() => {
-    const s = new Date(now);
-    s.setFullYear(now.getFullYear() - 1);
-    return startDate === s.toISOString().slice(0, 10) && endDate === todayISO();
-  })();
 
   const selectStyle = {
     padding: "8px 9px",
@@ -93,25 +69,6 @@ export default function DateRangeControl({
       <div style={{ fontSize: 12.5, color: "var(--text-dim)", marginBottom: 10 }}>
         Drives NDCI, Chlorophyll-a, WST analysis, and the Sentinel-2 imagery
         below.
-      </div>
-
-      {/* Quick presets */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12 }}>
-        <button
-          className={`seg-btn${isLast12Active ? " active" : ""}`}
-          onClick={setLast12Months}
-        >
-          Last 12 mo
-        </button>
-        {chipYears.map((y) => (
-          <button
-            key={y}
-            className={`seg-btn${isYearActive(y) ? " active" : ""}`}
-            onClick={() => setYearPreset(y)}
-          >
-            {y}
-          </button>
-        ))}
       </div>
 
       {/* Month + year dropdowns */}
