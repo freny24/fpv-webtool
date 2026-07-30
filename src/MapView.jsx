@@ -1222,7 +1222,7 @@ export default function MapView({
         </div>
 
         <div style={{ fontSize: 11.5, color: "var(--text-mut)", marginBottom: 8, lineHeight: 1.4 }}>
-          Uses the date window above — pick a recent range to see newly built
+          Uses the date window above. Pick a recent range to see newly built
           installations.
         </div>
 
