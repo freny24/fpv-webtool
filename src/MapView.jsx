@@ -18,6 +18,7 @@ import GlobalSearch from "./components/GlobalSearch";
 import GuideModal from "./components/GuideModal";
 import DownloadPanel from "./components/DownloadPanel";
 import ClimateLegend from "./components/ClimateLegend";
+import DateRangeControl from "./components/DateRangeControl";
 import { zoneColor } from "./lib/search";
 import L from "leaflet";
 import { API_BASE } from "./apiConfig";
@@ -1077,91 +1078,12 @@ export default function MapView({
           Analysis Time Window
         </div>
 
-<div
-  style={{
-    background: "rgba(255,255,255,0.05)",
-    padding: 12,
-    borderRadius: 12,
-  }}
->
-  <div style={{ fontSize: 13, color: "#b9c6d8", marginBottom: 10 }}>
-    Select start and end dates for NDCI, Chlorophyll-a, WST analysis, and the
-    Sentinel-2 imagery below.
-  </div>
-
-  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-    <div>
-      <div style={{ fontSize: 12, color: "#9fb0c3", marginBottom: 6 }}>
-        Start Date
-      </div>
-      <input
-        type="date"
-        value={startDate}
-        min="2013-01-01"
-        max={endDate || undefined}
-        onChange={(e) => setStartDate(e.target.value)}
-        style={{
-          width: "100%",
-          padding: "9px 10px",
-          borderRadius: 10,
-          border: "1px solid rgba(255,255,255,0.08)",
-          background: "rgba(255,255,255,0.08)",
-          color: "white",
-          boxSizing: "border-box",
-        }}
-      />
-    </div>
-
-    <div>
-      <div style={{ fontSize: 12, color: "#9fb0c3", marginBottom: 6 }}>
-        End Date
-      </div>
-      <input
-        type="date"
-        value={endDate}
-        min={startDate || "2013-01-01"}
-        max={new Date().toISOString().slice(0, 10)}
-        onChange={(e) => setEndDate(e.target.value)}
-        style={{
-          width: "100%",
-          padding: "9px 10px",
-          borderRadius: 10,
-          border: "1px solid rgba(255,255,255,0.08)",
-          background: "rgba(255,255,255,0.08)",
-          color: "white",
-          boxSizing: "border-box",
-        }}
-      />
-    </div>
-  </div>
-
-  <div
-    style={{
-      marginTop: 10,
-      fontSize: 12,
-      color: "#9fb0c3",
-      lineHeight: 1.4,
-    }}
-  >
-    Current window: {startDate || "not set"} to {endDate || "not set"}
-  </div>
-
-  {startDate && endDate && new Date(endDate) <= new Date(startDate) && (
-    <div
-      style={{
-        marginTop: 10,
-        padding: "8px 10px",
-        borderRadius: 8,
-        background: "rgba(248,113,113,0.12)",
-        border: "1px solid rgba(248,113,113,0.3)",
-        color: "#fecaca",
-        fontSize: 12,
-      }}
-    >
-      End date must be after start date.
-    </div>
-  )}
-</div>
+        <DateRangeControl
+          startDate={startDate}
+          endDate={endDate}
+          setStartDate={setStartDate}
+          setEndDate={setEndDate}
+        />
 
         <div
           className="ui-eyebrow"
