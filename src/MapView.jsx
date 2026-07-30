@@ -1085,7 +1085,8 @@ export default function MapView({
   }}
 >
   <div style={{ fontSize: 13, color: "#b9c6d8", marginBottom: 10 }}>
-    Select start and end dates for NDCI, Chlorophyll-a, and WST analysis.
+    Select start and end dates for NDCI, Chlorophyll-a, WST analysis, and the
+    Sentinel-2 imagery below.
   </div>
 
   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
@@ -1218,6 +1219,11 @@ export default function MapView({
           style={{ display: "block", marginTop: 20, marginBottom: 8 }}
         >
           Sentinel-2 Imagery
+        </div>
+
+        <div style={{ fontSize: 11.5, color: "var(--text-mut)", marginBottom: 8, lineHeight: 1.4 }}>
+          Uses the date window above — pick a recent range to see newly built
+          installations.
         </div>
 
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>

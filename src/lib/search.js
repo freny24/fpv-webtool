@@ -44,8 +44,9 @@ export function matchClimateZone(query) {
 const NUM = /^-?\d+(\.\d+)?$/;
 
 // Matches one DMS component, e.g. 23°43'11.04"S  (minutes/seconds optional).
+// Accepts straight and "curly" minute/second marks (Google Earth uses curly).
 const DMS_RE =
-  /(\d+(?:\.\d+)?)\s*°\s*(?:(\d+(?:\.\d+)?)\s*['′]\s*)?(?:(\d+(?:\.\d+)?)\s*["″]?\s*)?([NSEWnsew])/g;
+  /(\d+(?:\.\d+)?)\s*°\s*(?:(\d+(?:\.\d+)?)\s*['′‘’]\s*)?(?:(\d+(?:\.\d+)?)\s*["″“”]?\s*)?([NSEWnsew])/g;
 
 function dmsToDecimal(deg, min, sec, hemi) {
   let dec =
