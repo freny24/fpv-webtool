@@ -1,0 +1,29 @@
+# Public entry point. All traffic (including /api) goes to the frontend, whose
+# nginx serves the app and proxies /api to the backend.
+#
+# Ingress class, TLS, and hostname conventions vary by cluster — confirm the
+# details with IU IT (ingressClassName, TLS/cert issuer, allowed hostnames).
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fpv-ingress
+  annotations: {}
+    # Example (nginx-ingress + cert-manager) — enable if that's what the cluster uses:
+    # cert-manager.io/cluster-issuer: "letsencrypt"
+spec:
+  # ingressClassName: nginx   # set to the class IU IT tells you to use
+  tls:
+    - hosts:
+        - REPLACE.hosted.iu.edu # TODO: the public hostname IU assigns
+      secretName: fpv-tls
+  rules:
+    - host: REPLACE.hosted.iu.edu # TODO: same hostname
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: fpv-frontend
+                port:
+                  number: 80

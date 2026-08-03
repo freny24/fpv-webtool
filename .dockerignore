@@ -1,0 +1,12 @@
+node_modules
+dist
+.git
+.env
+.env.local
+.env.example
+
+# Backend has its own image/build; not needed in the frontend build context
+server
+
+# Docs / local artifacts
+*.md

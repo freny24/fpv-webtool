@@ -1,0 +1,20 @@
+node_modules
+npm-debug.log
+
+# Secrets — provided via Kubernetes Secret / env vars, never baked into the image
+.env
+.env.example
+gee-service-account.json
+
+# Large rasters (regenerable; not needed at runtime — climate is served from
+# the cached wb_cache.json, which IS kept)
+data/koppen_beck.tif
+data/Beck_KG_V1
+data/Beck_KG_V1_present_0p0083.tif
+
+# Runtime-written data (lives on the persistent volume instead)
+data/submissions.json
+
+# Throwaway local test scripts
+_geotest.mjs
+_rastercheck.mjs

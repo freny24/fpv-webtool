@@ -1,0 +1,56 @@
+# Frontend (static React build served by nginx, proxies /api to the backend)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fpv-frontend
+  labels:
+    app: fpv-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fpv-frontend
+  template:
+    metadata:
+      labels:
+        app: fpv-frontend
+    spec:
+      containers:
+        - name: fpv-frontend
+          # TODO: replace with your registry path, e.g. registry.iu.edu/fpv/fpv-frontend:1.0.0
+          image: REGISTRY/fpv-frontend:latest
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fpv-frontend
+  labels:
+    app: fpv-frontend
+spec:
+  type: ClusterIP
+  selector:
+    app: fpv-frontend
+  ports:
+    - port: 80
+      targetPort: 80

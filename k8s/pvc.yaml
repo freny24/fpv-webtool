@@ -1,0 +1,15 @@
+# Persistent volume for community submissions (submissions.json).
+# Small, but most storage classes have a 1Gi minimum.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: fpv-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  # Uncomment and set if the cluster needs an explicit storage class
+  # (ask IU IT which one to use):
+  # storageClassName: standard
