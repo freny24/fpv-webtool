@@ -1,5 +1,25 @@
 require("dotenv").config();
 
+// Route outbound HTTPS (e.g. Google Earth Engine) through a data-center proxy
+// when one is configured. AppKube sets HTTP_PROXY / HTTPS_PROXY for deployments;
+// global-agent patches Node's http/https so outbound calls use the proxy.
+if (process.env.HTTP_PROXY || process.env.HTTPS_PROXY) {
+  process.env.GLOBAL_AGENT_HTTP_PROXY =
+    process.env.GLOBAL_AGENT_HTTP_PROXY ||
+    process.env.HTTP_PROXY ||
+    process.env.HTTPS_PROXY;
+  process.env.GLOBAL_AGENT_HTTPS_PROXY =
+    process.env.GLOBAL_AGENT_HTTPS_PROXY ||
+    process.env.HTTPS_PROXY ||
+    process.env.HTTP_PROXY;
+  try {
+    require("global-agent/bootstrap");
+    console.log("Outbound proxy enabled via global-agent");
+  } catch (err) {
+    console.warn("global-agent not installed; proxy not applied:", err.message);
+  }
+}
+
 const path = require("path");
 const fs = require("fs");
 
@@ -1009,6 +1029,24 @@ app.get("/api/sentinel-layer", async (req, res) => {
     res.status(500).json({ error: err.message || String(err) });
   }
 });
+
+// -------------------- SERVE FRONTEND (single-app deploy) --------------------
+// When the built frontend (dist/) is present, this same server serves the
+// website plus the API (AppKube runs one app). Any non-/api GET falls back to
+// index.html so client-side routing works. Harmless when dist/ is absent
+// (e.g. the split frontend/backend container setup).
+
+const DIST_DIR = path.join(__dirname, "..", "dist");
+if (fs.existsSync(DIST_DIR)) {
+  app.use(express.static(DIST_DIR));
+  app.use((req, res, next) => {
+    if (req.method === "GET" && !req.path.startsWith("/api")) {
+      return res.sendFile(path.join(DIST_DIR, "index.html"));
+    }
+    next();
+  });
+  console.log(`Serving frontend from ${DIST_DIR}`);
+}
 
 // -------------------- START SERVER --------------------
 

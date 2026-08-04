@@ -34,3 +34,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# CI workflow kept locally; AppKube runs its own pipeline
+.github/workflows/
