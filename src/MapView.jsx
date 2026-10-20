@@ -1085,35 +1085,6 @@ export default function MapView({
               Aquatic Photovoltaic Observatory
             </div>
           </div>
-          <div
-            style={{
-              marginLeft: "auto",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              background: "#fff",
-              borderRadius: 8,
-              padding: "4px 8px",
-              flex: "0 0 auto",
-            }}
-          >
-            <img
-              src="/oneill-logo.png"
-              alt="O'Neill School"
-              onError={(e) => {
-                e.currentTarget.style.display = "none";
-              }}
-              style={{ height: 22, objectFit: "contain" }}
-            />
-            <img
-              src="/luddy-logo.jpg"
-              alt="Luddy School"
-              onError={(e) => {
-                e.currentTarget.style.display = "none";
-              }}
-              style={{ height: 22, objectFit: "contain" }}
-            />
-          </div>
         </div>
         <div
           style={{
@@ -1126,35 +1097,63 @@ export default function MapView({
           Explore aquatic solar installations, waterbody metrics, and
           climate zones worldwide.
         </div>
-        <div
-          style={{
-            marginTop: 12,
-            paddingTop: 10,
-            borderTop: "1px solid var(--border)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 8,
-          }}
-        >
-          <span style={{ fontSize: 10.5, color: "var(--text-mut)" }}>
-            Indiana University · O'Neill & Luddy
-          </span>
-          <button
-            onClick={() => setShowAbout(true)}
+        <div style={{ marginTop: 14, paddingTop: 14, borderTop: "1px solid var(--border)" }}>
+          <div
             style={{
-              border: "1px solid var(--border)",
-              background: "var(--surface-2)",
-              color: "var(--text-dim)",
-              borderRadius: 999,
-              padding: "4px 12px",
-              fontSize: 11.5,
-              fontWeight: 700,
-              cursor: "pointer",
+              background: "#fff",
+              borderRadius: 10,
+              padding: "12px 16px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 18,
             }}
           >
-            About
-          </button>
+            <img
+              src="/oneill-logo.png"
+              alt="O'Neill School of Public and Environmental Affairs"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
+              style={{ height: 34, objectFit: "contain", maxWidth: "48%" }}
+            />
+            <span style={{ width: 1, height: 30, background: "#d8dee9", flex: "0 0 auto" }} />
+            <img
+              src="/luddy-logo.jpg"
+              alt="Luddy School of Informatics, Computing, and Engineering"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
+              style={{ height: 34, objectFit: "contain", maxWidth: "48%" }}
+            />
+          </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginTop: 8,
+            }}
+          >
+            <span style={{ fontSize: 10, color: "var(--text-mut)" }}>
+              Indiana University
+            </span>
+            <button
+              onClick={() => setShowAbout(true)}
+              style={{
+                border: "1px solid var(--border)",
+                background: "var(--surface-2)",
+                color: "var(--text-dim)",
+                borderRadius: 999,
+                padding: "4px 14px",
+                fontSize: 11.5,
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              About the project
+            </button>
+          </div>
         </div>
       </div>
 
