@@ -4,6 +4,7 @@ import {
   searchPoints,
   highlightSegments,
   zoneColor,
+  structureColor,
   parseCoordinateQuery,
 } from "../lib/search";
 
@@ -42,6 +43,7 @@ export default function GlobalSearch({
   onSelectSite,
   onSelectCoord,
   onSelectClimate,
+  onSelectStructure,
   onServerSearch,
 }) {
   const [query, setQuery] = useState("");
@@ -127,6 +129,8 @@ export default function GlobalSearch({
         onSelectCoord?.({ lat: item.lat, lon: item.lon });
       } else if (item.type === "climate") {
         onSelectClimate?.(item.zone, item.points || []);
+      } else if (item.type === "structure") {
+        onSelectStructure?.(item.structure, item.points || []);
       } else {
         onSelectSite?.(item);
       }
@@ -134,10 +138,12 @@ export default function GlobalSearch({
       setQuery(
         item.type === "climate"
           ? `${item.zone} climate`
+          : item.type === "structure"
+          ? item.structure
           : item.fpv_new_id || item.id || item.label || ""
       );
     },
-    [onSelectSite, onSelectCoord, onSelectClimate]
+    [onSelectSite, onSelectCoord, onSelectClimate, onSelectStructure]
   );
 
   function onKeyDown(e) {
@@ -171,7 +177,7 @@ export default function GlobalSearch({
         <input
           className="gsearch-input"
           type="text"
-          placeholder="Search WSPV ID, country, city, waterbody, climate, or lat, lon"
+          placeholder="Search AqPV ID, country, city, waterbody, climate, or lat, lon"
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
@@ -179,7 +185,7 @@ export default function GlobalSearch({
           }}
           onFocus={() => setOpen(true)}
           onKeyDown={onKeyDown}
-          aria-label="Search the global WSPV dataset"
+          aria-label="Search the global AqPV dataset"
           aria-expanded={showDropdown}
           role="combobox"
           aria-controls="gsearch-listbox"
@@ -221,7 +227,7 @@ export default function GlobalSearch({
             points.length > 0 &&
             !(local.mode === "climate" && !climateReady) && (
             <div className="gsearch-empty">
-              No matches for “{query.trim()}”. Try a WSPV ID, country, city,
+              No matches for “{query.trim()}”. Try an AqPV ID, country, city,
               waterbody, climate zone, or “lat, lon”.
             </div>
           )}
@@ -290,7 +296,7 @@ function ResultRow({ item, query, active, onMouseEnter, onClick }) {
         <span className="gsearch-item-body">
           <span className="gsearch-item-title">All {item.zone} sites</span>
           <span className="gsearch-item-sub">
-            {item.count} WSPV site{item.count === 1 ? "" : "s"} in this climate
+            {item.count} AqPV site{item.count === 1 ? "" : "s"} in this climate
             zone
           </span>
         </span>
@@ -300,6 +306,41 @@ function ResultRow({ item, query, active, onMouseEnter, onClick }) {
             style={{ background: `${c}22`, color: c, borderColor: `${c}55` }}
           >
             {item.zone}
+          </span>
+        </span>
+      </button>
+    );
+  }
+
+  if (item.type === "structure") {
+    const c = structureColor(item.structure);
+    return (
+      <button
+        className={`gsearch-item structure${active ? " active" : ""}`}
+        role="option"
+        aria-selected={active}
+        onMouseEnter={onMouseEnter}
+        onClick={onClick}
+      >
+        <span
+          className="gsearch-item-badge"
+          style={{ background: `${c}22`, borderColor: `${c}55`, color: c }}
+        >
+          ⬡
+        </span>
+        <span className="gsearch-item-body">
+          <span className="gsearch-item-title">All {item.structure} sites</span>
+          <span className="gsearch-item-sub">
+            {item.count} AqPV site{item.count === 1 ? "" : "s"} with this
+            structure
+          </span>
+        </span>
+        <span className="gsearch-item-meta">
+          <span
+            className="gsearch-chip"
+            style={{ background: `${c}22`, color: c, borderColor: `${c}55` }}
+          >
+            {item.structure}
           </span>
         </span>
       </button>
@@ -327,7 +368,7 @@ function ResultRow({ item, query, active, onMouseEnter, onClick }) {
       <span className="gsearch-item-badge">☀</span>
       <span className="gsearch-item-body">
         <span className="gsearch-item-title">
-          <Highlighted text={item.fpv_new_id || item.id || "WSPV site"} query={query} />
+          <Highlighted text={item.fpv_new_id || item.id || "AqPV site"} query={query} />
         </span>
         <span className="gsearch-item-sub">
           <Highlighted text={sub || "Location unavailable"} query={query} />

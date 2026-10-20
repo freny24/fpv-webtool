@@ -426,7 +426,7 @@ export default function AdminPanel({ open, onClose, onReviewed, onLocate, onAppr
                         <span style={{ color: "#9fb0c3" }}>Contact:</span>
                         <a
                           href={`mailto:${s.email}?subject=${encodeURIComponent(
-                            "Thank you for your WSPV Dashboard contribution"
+                            "Thank you for your Aquatic Solar Dashboard contribution"
                           )}`}
                           onClick={(e) => e.stopPropagation()}
                           style={{ color: "#7dd3fc", fontFamily: "var(--font-mono)", fontSize: 11.5 }}

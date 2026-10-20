@@ -40,6 +40,29 @@ export function matchClimateZone(query) {
   return null;
 }
 
+// ---- Structural classes (mirror of the v8 dataset) ------------------------
+export const STRUCTURE_CLASSES = [
+  { value: "Pile-mounted", color: "#f97316", synonyms: ["pile", "pile-mounted", "piled", "pilemounted", "fixed", "stilted", "mounted"] },
+  { value: "Floating-supported", color: "#38bdf8", synonyms: ["floating", "float", "floating-supported", "pontoon", "buoyant"] },
+];
+
+export function structureColor(value) {
+  const s = STRUCTURE_CLASSES.find((c) => c.value === value);
+  return s ? s.color : "#94a3b8";
+}
+
+export function matchStructure(query) {
+  const q = String(query || "").trim().toLowerCase();
+  if (q.length < 3) return null;
+  for (const s of STRUCTURE_CLASSES) {
+    if (s.value.toLowerCase() === q) return s.value;
+    if (s.synonyms.some((syn) => syn === q || syn.startsWith(q) || q.startsWith(syn))) {
+      return s.value;
+    }
+  }
+  return null;
+}
+
 // ---- Coordinate parsing ---------------------------------------------------
 const NUM = /^-?\d+(\.\d+)?$/;
 
@@ -168,6 +191,9 @@ const FIELDS = [
   ["wb_new_id", 0.6],
   ["koppen_label", 0.4],
   ["climate_zone", 0.5],
+  ["structural_classification", 0.4],
+  ["water_type", 0.35],
+  ["functional_use", 0.35],
 ];
 
 // Digits-only ID matching, e.g. "142" or "00142" -> FPV_USA_00142
@@ -230,7 +256,28 @@ export function searchPoints(query, points, limit = 12) {
     };
   }
 
-  // 3) text / id / fuzzy
+  // 3) structural class → group result + matching sites
+  const structure = matchStructure(q);
+  if (structure) {
+    const inClass = points.filter((p) => p.structural_classification === structure);
+    return {
+      mode: "structure",
+      structure,
+      results: [
+        {
+          type: "structure",
+          id: `structure-${structure}`,
+          structure,
+          count: inClass.length,
+          label: `${structure} installations`,
+          points: inClass,
+        },
+        ...rankTextResults(q, inClass, limit - 1),
+      ],
+    };
+  }
+
+  // 4) text / id / fuzzy
   return { mode: "text", results: rankTextResults(q, points, limit) };
 }
 

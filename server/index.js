@@ -12,6 +12,10 @@ if (process.env.HTTP_PROXY || process.env.HTTPS_PROXY) {
     process.env.GLOBAL_AGENT_HTTPS_PROXY ||
     process.env.HTTPS_PROXY ||
     process.env.HTTP_PROXY;
+  if (process.env.NO_PROXY) {
+    process.env.GLOBAL_AGENT_NO_PROXY =
+      process.env.GLOBAL_AGENT_NO_PROXY || process.env.NO_PROXY;
+  }
   try {
     require("global-agent/bootstrap");
     console.log("Outbound proxy enabled via global-agent");
@@ -84,8 +88,11 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
 
-const FPV_ASSET = "projects/spheric-mesh-330606/assets/new_fpv_data";
-const WB_ASSET = "projects/spheric-mesh-330606/assets/new_wb_data";
+// v8 "Aquatic Solar" (AqPV) assets. Fields: arrays use aqpv_id/aqpv_area_km2/
+// wb_id/structural_classification/install_date; waterbodies use wb_id/
+// wb_area_km2/aqpv_coverage_pct/n_installations/lake_name/functional_use_*.
+const FPV_ASSET = "projects/spheric-mesh-330606/assets/AqPV_for_gee";
+const WB_ASSET = "projects/spheric-mesh-330606/assets/WB_for_gee";
 
 const MIN_S2_AREA_KM2 = 0.1;
 const MIN_L8_AREA_KM2 = 0.15;
@@ -227,21 +234,24 @@ app.get("/api/fpv-identify", async (req, res) => {
 
       const p = f.properties || {};
 
-      const wbRaw = firstNonEmpty(p.wb_new_id, p.wb_id, p.wb_ids, p.matched_wb);
+      const wbRaw = firstNonEmpty(p.wb_id, p.wb_ids);
       const wbId = wbRaw ? String(wbRaw).split(",")[0].trim() : null;
 
       let fpvResponse = {
-        fpv_new_id: safeValue(p.fpv_new_id),
-        fpv_id: safeValue(p.id),
-        id: safeValue(p.id),
+        fpv_new_id: safeValue(p.aqpv_id),
+        fpv_id: safeValue(p.aqpv_id),
+        id: safeValue(p.aqpv_id),
         wb_new_id: safeValue(wbId),
         country: safeValue(p.country),
         state: safeValue(p.state),
         city: safeValue(p.city),
         lat: safeValue(p.lat),
         lon: safeValue(p.lon),
-        fpv_area_k: safeValue(p.fpv_area_k),
-        wb_interse: safeValue(p.wb_interse),
+        fpv_area_k: safeValue(p.aqpv_area_km2),
+        wb_interse: safeValue(p.aqpv_area_inside_km2),
+        structural_classification: safeValue(p.structural_classification),
+        install_date: safeValue(p.install_date),
+        install_date_confidence: safeValue(p.install_date_confidence),
       };
 
       // Merge cached climate + waterbody name via the FPV's waterbody id.
@@ -260,17 +270,7 @@ app.get("/api/fpv-identify", async (req, res) => {
         });
       }
 
-      const wbByNewId = wb.filter(ee.Filter.eq("wb_new_id", wbId)).limit(1);
-      const wbByOldId = wb.filter(ee.Filter.eq("id", wbId)).limit(1);
-      const wbByIndex = wb.filter(ee.Filter.eq("system:index", wbId)).limit(1);
-
-      const wbHit = ee.FeatureCollection(
-        ee.Algorithms.If(
-          wbByNewId.size().gt(0),
-          wbByNewId,
-          ee.Algorithms.If(wbByOldId.size().gt(0), wbByOldId, wbByIndex)
-        )
-      ).first();
+      const wbHit = wb.filter(ee.Filter.eq("wb_id", wbId)).limit(1).first();
 
       wbHit.evaluate((wbf, wbErr) => {
         if (wbErr) {
@@ -284,24 +284,25 @@ app.get("/api/fpv-identify", async (req, res) => {
 
         const waterbodyResponse = wbp
           ? {
-              wb_new_id: safeValue(wbp.wb_new_id),
-              lake_name: safeValue(wbp.Lake_name),
+              wb_new_id: safeValue(wbp.wb_id),
+              lake_name: safeValue(wbp.lake_name),
               country: safeValue(wbp.country),
               state: safeValue(wbp.state),
               city: safeValue(wbp.city),
               lat: safeValue(wbp.lat),
               lon: safeValue(wbp.lon),
-              wb_area: safeValue(wbp.wb_area),
-              wb_area_af: safeValue(wbp.wb_area_af),
-              fpv_area: safeValue(wbp.fpv_area),
-              fpv_cov: safeValue(wbp.fpv_cov),
-              n_fpv: safeValue(wbp.n_fpv),
-              fpv_ids: safeValue(wbp.fpv_ids),
-              hylak_id: safeValue(wbp.Hylak_id),
-              depth_avg: safeValue(wbp.Depth_avg),
-              lake_type: safeValue(wbp.Lake_type),
-              water_type: safeValue(wbp.WaterType),
-              water_type2: safeValue(wbp.WaterType2),
+              wb_area: safeValue(wbp.wb_area_km2),
+              wb_area_af: safeValue(wbp.open_water_area_km2),
+              fpv_area: safeValue(wbp.aqpv_area_inside_km2),
+              fpv_cov: safeValue(wbp.aqpv_coverage_pct),
+              n_fpv: safeValue(wbp.n_installations),
+              fpv_ids: safeValue(wbp.aqpv_ids),
+              hylak_id: safeValue(wbp.hylak_id),
+              depth_avg: safeValue(wbp.depth_avg),
+              depth_avg_reliable: safeValue(wbp.depth_avg_reliable),
+              lake_type: safeValue(wbp.lake_type),
+              water_type: safeValue(wbp.base_water_body_classification),
+              functional_use: safeValue(wbp.functional_use_classification),
               koppen_code: safeValue(wbClimate.koppen_code),
               koppen_label: safeValue(wbClimate.koppen_label),
               koppen_5class: safeValue(wbClimate.koppen_5class),
@@ -361,19 +362,19 @@ app.get("/api/fpv-search", async (req, res) => {
     const results = (info?.features || [])
       .map((f) => f.properties || {})
       .filter((p) => {
-        const wbInfo = climate.getWbInfo(p.wb_new_id) || {};
+        const wbInfo = climate.getWbInfo(p.wb_id) || {};
 
         if (zoneQuery) {
           return wbInfo.climate_zone === zoneQuery;
         }
 
         const haystack = [
-          p.fpv_new_id,
-          p.id,
+          p.aqpv_id,
           p.country,
           p.state,
           p.city,
-          p.wb_new_id,
+          p.wb_id,
+          p.structural_classification,
           wbInfo.lake_name,
           wbInfo.koppen_label,
           wbInfo.climate_zone,
@@ -386,11 +387,11 @@ app.get("/api/fpv-search", async (req, res) => {
       })
       .slice(0, 12)
       .map((p) => {
-        const wbInfo = climate.getWbInfo(p.wb_new_id) || {};
+        const wbInfo = climate.getWbInfo(p.wb_id) || {};
         return {
-          id: p.fpv_new_id || p.id,
-          fpv_new_id: p.fpv_new_id || null,
-          wb_new_id: p.wb_new_id || null,
+          id: p.aqpv_id,
+          fpv_new_id: p.aqpv_id || null,
+          wb_new_id: p.wb_id || null,
           lat: p.lat,
           lon: p.lon,
           country: p.country,
@@ -398,9 +399,10 @@ app.get("/api/fpv-search", async (req, res) => {
           city: p.city,
           lake_name: wbInfo.lake_name || null,
           fpv_cov: wbInfo.fpv_cov ?? null,
+          structural_classification: p.structural_classification || null,
           koppen_label: wbInfo.koppen_label || null,
           climate_zone: wbInfo.climate_zone || null,
-          label: `${p.fpv_new_id || p.id || "FPV"} • ${p.city || ""}, ${
+          label: `${p.aqpv_id || "AqPV"} • ${p.city || ""}, ${
             p.state || ""
           }, ${p.country || ""}`.trim(),
         };
@@ -419,27 +421,28 @@ app.get("/api/fpv-overview", async (req, res) => {
   try {
     const fc = ee.FeatureCollection(FPV_ASSET);
 
-    // 👉 Get centroid of each FPV polygon
+    // Use the stored representative point (lat/lon) to avoid a costly centroid
+    // computation over 3,000+ polygons; fall back to centroid only if missing.
     const points = fc.map((f) => {
-      const centroid = f.geometry().centroid();
-
+      const centroid = f.geometry().centroid(1);
       return ee.Feature(centroid, {
-        fpv_new_id: f.get("fpv_new_id"),
-        id: f.get("id"),
-        wb_new_id: f.get("wb_new_id"),
+        fpv_new_id: f.get("aqpv_id"),
+        id: f.get("aqpv_id"),
+        wb_new_id: f.get("wb_id"),
         country: f.get("country"),
         state: f.get("state"),
         city: f.get("city"),
-        lat: centroid.coordinates().get(1),
-        lon: centroid.coordinates().get(0),
-        fpv_area_k: f.get("fpv_area_k"),
+        lat: f.get("lat"),
+        lon: f.get("lon"),
+        fpv_area_k: f.get("aqpv_area_km2"),
+        structural_classification: f.get("structural_classification"),
       });
     });
 
-    const result = await eeObjectToPromise(points.limit(5000));
+    const result = await eeObjectToPromise(points.limit(6000));
 
-    // Attach cached waterbody name + coverage + Köppen climate so the frontend
-    // can run instant fuzzy search (incl. climate zones) without extra calls.
+    // Attach cached waterbody name + coverage + classifications + Köppen climate
+    // so the frontend can run instant search + filters without extra calls.
     res.json({
       points: (result.features || []).map((f) => {
         const p = f.properties || {};
@@ -447,7 +450,9 @@ app.get("/api/fpv-overview", async (req, res) => {
         return {
           ...p,
           lake_name: wbInfo.lake_name || null,
-          fpv_cov: p.fpv_cov ?? wbInfo.fpv_cov ?? null,
+          fpv_cov: wbInfo.fpv_cov ?? null,
+          water_type: wbInfo.water_type || null,
+          functional_use: wbInfo.functional_use || null,
           koppen_code: wbInfo.koppen_code ?? null,
           koppen_label: wbInfo.koppen_label || null,
           koppen_5class: wbInfo.koppen_5class || null,
@@ -516,13 +521,13 @@ app.get("/api/fpv-metrics", async (req, res) => {
     const wbFc = ee.FeatureCollection(WB_ASSET);
 
     const wbFeature = ee.Feature(
-      wbFc.filter(ee.Filter.eq("wb_new_id", wbId)).first()
+      wbFc.filter(ee.Filter.eq("wb_id", wbId)).first()
     );
 
   const wbInfo = await eeObjectToPromise(wbFeature);
 const wbProps = wbInfo?.properties || {};
 
-const wbAreaAf = Number(wbProps.wb_area_af ?? wbProps.wb_area ?? 0);
+const wbAreaAf = Number(wbProps.open_water_area_km2 ?? wbProps.wb_area_km2 ?? 0);
 
 const s2Allowed = wbAreaAf > MIN_S2_AREA_KM2;
 const l8Allowed = wbAreaAf > MIN_L8_AREA_KM2;
@@ -818,7 +823,7 @@ app.get("/api/environmental-layer", async (req, res) => {
     const wbFc = ee.FeatureCollection(WB_ASSET);
 
     const wbFeature = ee.Feature(
-      wbFc.filter(ee.Filter.eq("wb_new_id", wbId)).first()
+      wbFc.filter(ee.Filter.eq("wb_id", wbId)).first()
     );
 
   const wbInfo = await eeObjectToPromise(wbFeature);
@@ -949,20 +954,15 @@ app.get("/api/fpv-download", async (req, res) => {
 
     const fpvFc = ee.FeatureCollection(FPV_ASSET);
 
-    const byNewId = fpvFc.filter(ee.Filter.eq("fpv_new_id", id)).limit(1);
-    const byOldId = fpvFc.filter(ee.Filter.eq("id", id)).limit(1);
-
-    const feature = ee.FeatureCollection(
-      ee.Algorithms.If(byNewId.size().gt(0), byNewId, byOldId)
-    ).first();
+    const feature = fpvFc.filter(ee.Filter.eq("aqpv_id", id)).limit(1).first();
 
     const info = await eeObjectToPromise(feature);
 
     if (!info || !info.properties) {
-      return res.status(404).json({ error: "FPV not found" });
+      return res.status(404).json({ error: "AqPV not found" });
     }
 
-    const downloadName = info.properties.fpv_new_id || info.properties.id || id;
+    const downloadName = info.properties.aqpv_id || id;
 
     res.setHeader(
       "Content-Disposition",

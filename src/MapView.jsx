@@ -16,10 +16,11 @@ import ContributeModal from "./components/ContributeModal";
 import AdminPanel from "./components/AdminPanel";
 import GlobalSearch from "./components/GlobalSearch";
 import GuideModal from "./components/GuideModal";
+import AboutModal from "./components/AboutModal";
 import DownloadPanel from "./components/DownloadPanel";
 import ClimateLegend from "./components/ClimateLegend";
 import DateRangeControl from "./components/DateRangeControl";
-import { zoneColor } from "./lib/search";
+import { zoneColor, structureColor } from "./lib/search";
 import L from "leaflet";
 import { API_BASE } from "./apiConfig";
 
@@ -176,7 +177,7 @@ function CommunityMarkers({ points }) {
             <br />
             Source: {pt.source || "Unknown"}
             <br />
-            <em>Submitted by the community, approved by the WSPV team.</em>
+            <em>Submitted by the community, approved by the AqPV team.</em>
           </Popup>
         </Marker>
       ))}
@@ -206,7 +207,7 @@ const OverviewMarker = memo(function OverviewMarker({ pt, isActive, onSelect }) 
     >
       <Popup>
         <div className="fpv-popup">
-          <strong>{pt.fpv_new_id || pt.id || "WSPV Site"}</strong>
+          <strong>{pt.fpv_new_id || pt.id || "AqPV Site"}</strong>
           <div className="fpv-popup-loc">
             {pt.city || "Unknown"} • {pt.state || "Unknown"} • {pt.country || "Unknown"}
           </div>
@@ -227,7 +228,7 @@ const OverviewMarker = memo(function OverviewMarker({ pt, isActive, onSelect }) 
           )}
           <div className="fpv-popup-row">WB ID: {pt.wb_new_id || "Unknown"}</div>
           <div className="fpv-popup-row">
-            WSPV area:{" "}
+            AqPV area:{" "}
             {pt.fpv_area_k ? `${Number(pt.fpv_area_k).toFixed(2)} km²` : "Not available"}
           </div>
         </div>
@@ -355,6 +356,7 @@ export default function MapView({
 
   const [flyTarget, setFlyTarget] = useState(null);
   const [climateFilter, setClimateFilter] = useState(null); // { zone, ids:Set }
+  const [structureFilter, setStructureFilter] = useState(null); // { structure, ids:Set }
   const [fitPoints, setFitPoints] = useState(null);
 
   const [pickedLocation, setPickedLocation] = useState(null);
@@ -367,6 +369,7 @@ export default function MapView({
   const [showGuide, setShowGuide] = useState(
     () => !localStorage.getItem("fpv_guide_seen")
   );
+  const [showAbout, setShowAbout] = useState(false);
   const [showDownloadPanel, setShowDownloadPanel] = useState(false);
 
   function closeGuide() {
@@ -556,11 +559,17 @@ export default function MapView({
   }, [s2Mode, startDate, endDate]);
 
   const displayedPoints = useMemo(() => {
-    if (!climateFilter) return overviewPoints;
-    return overviewPoints.filter((p) =>
-      climateFilter.ids.has(String(p.fpv_new_id || p.id))
-    );
-  }, [overviewPoints, climateFilter]);
+    let pts = overviewPoints;
+    if (climateFilter) {
+      pts = pts.filter((p) => climateFilter.ids.has(String(p.fpv_new_id || p.id)));
+    }
+    if (structureFilter) {
+      pts = pts.filter((p) =>
+        structureFilter.ids.has(String(p.fpv_new_id || p.id))
+      );
+    }
+    return pts;
+  }, [overviewPoints, climateFilter, structureFilter]);
 
   const highlightedCountryFeature = useMemo(() => {
     if (!countryGeoJson || !highlightedCountry) return null;
@@ -655,11 +664,30 @@ export default function MapView({
     setSelectedFPV(null);
     setSelectedWaterbody(null);
     setMetrics(null);
+    setStructureFilter(null);
 
     const ids = new Set(
       pts.map((p) => String(p.fpv_new_id || p.id)).filter(Boolean)
     );
     setClimateFilter({ zone, ids });
+
+    const coords = pts
+      .map((p) => [Number(p.lat), Number(p.lon)])
+      .filter((c) => Number.isFinite(c[0]) && Number.isFinite(c[1]));
+    setFitPoints(coords.length ? coords : null);
+  }
+
+  function handleSelectStructure(structure, pts) {
+    setHighlightedCountry(null);
+    setSelectedFPV(null);
+    setSelectedWaterbody(null);
+    setMetrics(null);
+    setClimateFilter(null);
+
+    const ids = new Set(
+      pts.map((p) => String(p.fpv_new_id || p.id)).filter(Boolean)
+    );
+    setStructureFilter({ structure, ids });
 
     const coords = pts
       .map((p) => [Number(p.lat), Number(p.lon)])
@@ -722,7 +750,7 @@ export default function MapView({
     const wbId = selectedWaterbody?.wb_new_id || selectedFPV?.wb_new_id;
 
     if (!wbId) {
-      alert("Please click/select a WSPV site first.");
+      alert("Please click/select an AqPV site first.");
       return;
     }
     if (!startDate || !endDate || new Date(endDate) <= new Date(startDate)) {
@@ -936,11 +964,37 @@ export default function MapView({
           />
           <span>
             Showing <strong>{displayedPoints.length}</strong>{" "}
-            <strong>{climateFilter.zone}</strong> WSPV sites
+            <strong>{climateFilter.zone}</strong> AqPV sites
           </span>
           <button
             onClick={() => {
               setClimateFilter(null);
+              setFitPoints(null);
+            }}
+          >
+            Clear
+          </button>
+        </div>
+      )}
+
+      {structureFilter && (
+        <div className="climate-banner">
+          <span
+            style={{
+              width: 10,
+              height: 10,
+              borderRadius: "50%",
+              background: structureColor(structureFilter.structure),
+              boxShadow: `0 0 10px ${structureColor(structureFilter.structure)}`,
+            }}
+          />
+          <span>
+            Showing <strong>{displayedPoints.length}</strong>{" "}
+            <strong>{structureFilter.structure}</strong> AqPV sites
+          </span>
+          <button
+            onClick={() => {
+              setStructureFilter(null);
               setFitPoints(null);
             }}
           >
@@ -984,7 +1038,7 @@ export default function MapView({
         >
           ?
         </button>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
           <div
             style={{
               width: 40,
@@ -1016,7 +1070,7 @@ export default function MapView({
                 lineHeight: 1.1,
               }}
             >
-              Global WSPV Dashboard
+              Global Aquatic Solar Dashboard
             </div>
             <div
               style={{
@@ -1028,8 +1082,37 @@ export default function MapView({
                 textTransform: "uppercase",
               }}
             >
-              Water Surface Photovoltaic Observatory
+              Aquatic Photovoltaic Observatory
             </div>
+          </div>
+          <div
+            style={{
+              marginLeft: "auto",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              background: "#fff",
+              borderRadius: 8,
+              padding: "4px 8px",
+              flex: "0 0 auto",
+            }}
+          >
+            <img
+              src="/oneill-logo.png"
+              alt="O'Neill School"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
+              style={{ height: 22, objectFit: "contain" }}
+            />
+            <img
+              src="/luddy-logo.jpg"
+              alt="Luddy School"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
+              style={{ height: 22, objectFit: "contain" }}
+            />
           </div>
         </div>
         <div
@@ -1040,8 +1123,38 @@ export default function MapView({
             lineHeight: 1.4,
           }}
         >
-          Explore water-surface solar installations, waterbody metrics, and
+          Explore aquatic solar installations, waterbody metrics, and
           climate zones worldwide.
+        </div>
+        <div
+          style={{
+            marginTop: 12,
+            paddingTop: 10,
+            borderTop: "1px solid var(--border)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 8,
+          }}
+        >
+          <span style={{ fontSize: 10.5, color: "var(--text-mut)" }}>
+            Indiana University · O'Neill & Luddy
+          </span>
+          <button
+            onClick={() => setShowAbout(true)}
+            style={{
+              border: "1px solid var(--border)",
+              background: "var(--surface-2)",
+              color: "var(--text-dim)",
+              borderRadius: 999,
+              padding: "4px 12px",
+              fontSize: 11.5,
+              fontWeight: 700,
+              cursor: "pointer",
+            }}
+          >
+            About
+          </button>
         </div>
       </div>
 
@@ -1068,6 +1181,7 @@ export default function MapView({
           onSelectSite={handleSelectSite}
           onSelectCoord={handleSelectCoord}
           onSelectClimate={handleSelectClimate}
+          onSelectStructure={handleSelectStructure}
           onServerSearch={serverSearch}
         />
 
@@ -1118,7 +1232,7 @@ export default function MapView({
             active={showFPVLayer}
             onClick={() => setShowFPVLayer((v) => !v)}
           >
-            WSPV
+            AqPV
           </ToggleButton>
 
           <ToggleButton
@@ -1573,6 +1687,8 @@ export default function MapView({
       />
 
       <GuideModal open={showGuide} onClose={closeGuide} />
+
+      <AboutModal open={showAbout} onClose={() => setShowAbout(false)} />
 
       <DownloadPanel
         open={showDownloadPanel}

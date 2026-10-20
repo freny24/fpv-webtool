@@ -223,20 +223,23 @@ async function ensureRaster() {
 async function fetchWaterbodies() {
   const wb = ee.FeatureCollection(WB_ASSET);
 
-  // Compute a centroid per waterbody, carry the attributes the UI needs.
+  // Carry the v8 attributes the UI needs, keyed by the stored representative
+  // point (lat/lon) to avoid a costly centroid over every polygon.
   const withCentroids = wb.map((f) => {
     const c = f.geometry().centroid(1);
     return ee.Feature(c, {
-      wb_new_id: f.get("wb_new_id"),
-      lake_name: f.get("Lake_name"),
+      wb_id: f.get("wb_id"),
+      lake_name: f.get("lake_name"),
       country: f.get("country"),
       state: f.get("state"),
       city: f.get("city"),
-      fpv_cov: f.get("fpv_cov"),
-      wb_area: f.get("wb_area"),
-      n_fpv: f.get("n_fpv"),
-      lat: c.coordinates().get(1),
-      lon: c.coordinates().get(0),
+      fpv_cov: f.get("aqpv_coverage_pct"),
+      wb_area: f.get("wb_area_km2"),
+      n_fpv: f.get("n_installations"),
+      water_type: f.get("base_water_body_classification"),
+      functional_use: f.get("functional_use_classification"),
+      lat: f.get("lat"),
+      lon: f.get("lon"),
     });
   });
 
@@ -268,7 +271,7 @@ async function sampleAll(waterbodies, rasterPath) {
   let skipped = 0;
 
   for (const wbf of waterbodies) {
-    const wbId = wbf.wb_new_id != null ? String(wbf.wb_new_id) : null;
+    const wbId = wbf.wb_id != null ? String(wbf.wb_id) : null;
     const lat = Number(wbf.lat);
     const lon = Number(wbf.lon);
 
@@ -300,6 +303,8 @@ async function sampleAll(waterbodies, rasterPath) {
         fpv_cov: wbf.fpv_cov ?? null,
         wb_area: wbf.wb_area ?? null,
         n_fpv: wbf.n_fpv ?? null,
+        water_type: wbf.water_type ?? null,
+        functional_use: wbf.functional_use ?? null,
         lat: Number.isFinite(lat) ? lat : null,
         lon: Number.isFinite(lon) ? lon : null,
         koppen_code: koppen_code && koppen_code > 0 ? koppen_code : null,

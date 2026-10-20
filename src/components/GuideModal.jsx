@@ -5,7 +5,7 @@ const STEPS = [
     icon: "☀",
     color: "#fbbf24",
     title: "What is this?",
-    body: "The world's first public dashboard for global Water Surface Photovoltaics (WSPV): solar panels installed over water. This covers floating solar on lakes and reservoirs as well as pile-mounted panels over shallow aquaculture ponds. Every yellow node on the map is a real installation, mapped from satellite imagery.",
+    body: "The world's first public dashboard for global Aquatic Photovoltaics (AqPV): solar panels installed over water. This covers floating solar on lakes and reservoirs as well as pile-mounted panels over shallow aquaculture ponds. Every yellow node on the map is a real installation, mapped from satellite imagery.",
   },
   {
     icon: "🛰",
@@ -17,13 +17,13 @@ const STEPS = [
     icon: "🌍",
     color: "#34d399",
     title: "Climate intelligence",
-    body: "Every site is tagged with its Köppen climate zone (Tropical, Arid, Temperate, Cold, or Polar), sampled from a global climate raster. Search a zone to instantly see where water-surface solar is deployed across different climates.",
+    body: "Every site is tagged with its Köppen climate zone (Tropical, Arid, Temperate, Cold, or Polar), sampled from a global climate raster. Search a zone to instantly see where aquatic solar is deployed across different climates.",
   },
   {
     icon: "🔍",
     color: "#a78bfa",
     title: "How to explore",
-    body: "Use the search bar to jump to a WSPV ID, country, city, waterbody, climate zone, or raw coordinates. Click any site for its full profile, or open Environmental Insights to see water-quality trends before and after the panels were installed.",
+    body: "Use the search bar to jump to an AqPV ID, country, city, waterbody, climate zone, or raw coordinates. Click any site for its full profile, or open Environmental Insights to see water-quality trends before and after the panels were installed.",
   },
   {
     icon: "🌱",
@@ -84,7 +84,7 @@ export default function GuideModal({ open, onClose }) {
               Welcome
             </div>
             <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: "-0.02em" }}>
-              Global WSPV Dashboard
+              Global Aquatic Solar Dashboard
             </div>
           </div>
           <button

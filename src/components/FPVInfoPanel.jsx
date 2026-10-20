@@ -62,7 +62,7 @@ export default function FPVInfoPanel({ fpv, waterbody, onClose }) {
     fpv.Nobre_Name ||
     fpv.name ||
     fpv.id ||
-    "WSPV Site";
+    "AqPV Site";
 
   const subtitle = [fpv.country, fpv.state, fpv.city].filter(Boolean).join(" • ");
 
@@ -118,7 +118,7 @@ export default function FPVInfoPanel({ fpv, waterbody, onClose }) {
       </div>
 
       <div className="badge-row">
-        <span className="badge badge-yellow">WSPV</span>
+        <span className="badge badge-yellow">AqPV</span>
         <span className="badge badge-blue">
           {showValue(lakeTypeLabel(wbType), "Waterbody")}
         </span>
@@ -140,7 +140,7 @@ export default function FPVInfoPanel({ fpv, waterbody, onClose }) {
       <div className="section-title">Quick Summary</div>
       <div className="stats-grid">
         <StatBox
-          label="WSPV Area"
+          label="AqPV Area"
           value={showNumber(fpvArea, 2, " km²")}
         />
         <StatBox
@@ -152,7 +152,7 @@ export default function FPVInfoPanel({ fpv, waterbody, onClose }) {
           value={showNumber(coverage, 2, "%")}
         />
         <StatBox
-          label="WSPV Count in WB"
+          label="AqPV Count in WB"
           value={showValue(waterbody?.n_fpv)}
         />
       </div>
@@ -175,10 +175,21 @@ export default function FPVInfoPanel({ fpv, waterbody, onClose }) {
         />
       </div>
 
+      <div className="section-title">Installation</div>
+      <div className="details-grid">
+        <DetailRow
+          label="Structure"
+          value={showValue(fpv.structural_classification, "Unknown")}
+        />
+        <DetailRow
+          label="Install Date"
+          value={showValue(fpv.install_date, "Not available")}
+        />
+      </div>
+
       <div className="section-title">Feature IDs</div>
       <div className="details-grid">
-        <DetailRow label="WSPV ID" value={showValue(fpv.fpv_new_id)} mono />
-        <DetailRow label="Legacy WSPV ID" value={showValue(fpv.fpv_id || fpv.id)} mono />
+        <DetailRow label="AqPV ID" value={showValue(fpv.fpv_new_id)} mono />
         <DetailRow
           label="Waterbody ID"
           value={showValue(fpv.wb_new_id || waterbody?.wb_new_id)}
@@ -193,15 +204,17 @@ export default function FPVInfoPanel({ fpv, waterbody, onClose }) {
             <DetailRow label="WB ID" value={showValue(waterbody.wb_new_id)} />
             <DetailRow label="WB Name" value={showValue(wbName, "Not available")} />
             <DetailRow label="WB Type" value={showValue(lakeTypeLabel(wbType))} />
+            <DetailRow label="Water Type" value={showValue(waterbody.water_type)} />
+            <DetailRow label="Functional Use" value={showValue(waterbody.functional_use)} />
             <DetailRow label="WB Area (km²)" value={showNumber(waterbody.wb_area, 2)} />
             <DetailRow label="No-panel Area" value={showNumber(waterbody.wb_area_af, 2, " km²")} />
-            <DetailRow label="WSPV Coverage" value={showNumber(coverage, 2, "%")} />
+            <DetailRow label="AqPV Coverage" value={showNumber(coverage, 2, "%")} />
             <DetailRow label="Depth Avg" value={showNumber(waterbody.depth_avg || waterbody.Depth_avg, 2)} />
             <DetailRow label="HydroLAKES ID" value={showValue(waterbody.hylak_id || waterbody.Hylak_id)} />
             <DetailRow label="WB Latitude" value={showValue(waterbody.lat)} />
             <DetailRow label="WB Longitude" value={showValue(waterbody.lon)} />
-            <DetailRow label="WSPV Count in WB" value={showValue(waterbody.n_fpv)} />
-            <DetailRow label="WSPV IDs in WB" value={showValue(waterbody.fpv_ids)} />
+            <DetailRow label="AqPV Count in WB" value={showValue(waterbody.n_fpv)} />
+            <DetailRow label="AqPV IDs in WB" value={showValue(waterbody.fpv_ids)} />
           </div>
         </>
       )}

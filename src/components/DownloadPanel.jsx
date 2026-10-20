@@ -2,10 +2,9 @@ import { useMemo, useState } from "react";
 import { CLIMATE_ZONES, zoneColor } from "../lib/search";
 import { toCSV, toGeoJSON, downloadText, timestamp } from "../lib/exporters";
 
-// Columns exported for each FPV site (order matters in the CSV).
+// Columns exported for each AqPV site (order matters in the CSV).
 const COLUMNS = [
-  { key: "fpv_new_id", label: "fpv_id" },
-  { key: "id", label: "legacy_id" },
+  { key: "fpv_new_id", label: "aqpv_id" },
   { key: "wb_new_id", label: "waterbody_id" },
   { key: "lake_name", label: "waterbody_name" },
   { key: "country", label: "country" },
@@ -13,8 +12,11 @@ const COLUMNS = [
   { key: "city", label: "city" },
   { key: "lat", label: "latitude" },
   { key: "lon", label: "longitude" },
-  { key: "fpv_area_k", label: "fpv_area_km2" },
+  { key: "fpv_area_k", label: "aqpv_area_km2" },
   { key: "fpv_cov", label: "coverage_pct" },
+  { key: "structural_classification", label: "structural_classification" },
+  { key: "water_type", label: "water_type" },
+  { key: "functional_use", label: "functional_use" },
   { key: "climate_zone", label: "climate_zone" },
   { key: "koppen_label", label: "koppen_code" },
 ];
@@ -98,7 +100,7 @@ export default function DownloadPanel({ open, onClose, points = [] }) {
           <div className="ui-eyebrow" style={{ display: "block", marginBottom: 4 }}>
             Export Dataset
           </div>
-          <div style={{ fontWeight: 800, fontSize: 16 }}>Download WSPV Data</div>
+          <div style={{ fontWeight: 800, fontSize: 16 }}>Download AqPV Data</div>
         </div>
         <button
           onClick={onClose}

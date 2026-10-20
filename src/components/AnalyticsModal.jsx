@@ -105,7 +105,7 @@ export default function AnalyticsModal({ open, onClose, metrics }) {
                   marginBottom: "10px",
                 }}
               >
-                Based on cleaned waterbody geometry: WSPV footprint removed +
+                Based on cleaned waterbody geometry: AqPV footprint removed +
                 shoreline buffer.
               </div>
 
