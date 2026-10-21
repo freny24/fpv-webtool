@@ -1097,34 +1097,6 @@ export default function MapView({
           Explore aquatic solar installations, waterbody metrics, and
           climate zones worldwide.
         </div>
-        <div style={{ marginTop: 14, paddingTop: 14, borderTop: "1px solid var(--border)" }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <span style={{ fontSize: 10, color: "var(--text-mut)" }}>
-              Indiana University
-            </span>
-            <button
-              onClick={() => setShowAbout(true)}
-              style={{
-                border: "1px solid var(--border)",
-                background: "var(--surface-2)",
-                color: "var(--text-dim)",
-                borderRadius: 999,
-                padding: "4px 14px",
-                fontSize: 11.5,
-                fontWeight: 700,
-                cursor: "pointer",
-              }}
-            >
-              About the project
-            </button>
-          </div>
-        </div>
       </div>
 
       <div
@@ -1386,7 +1358,7 @@ export default function MapView({
           className="seg-btn"
           style={{ backdropFilter: "blur(8px)" }}
         >
-          About
+          About Us
         </button>
         <button
           onClick={() => setShowAdmin(true)}

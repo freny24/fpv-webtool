@@ -16,16 +16,6 @@ const TEAM = [
     role: "Graduate Data Science Research Assistant",
     org: "Luddy School, Indiana University",
   },
-  {
-    name: "Sakshi Nair",
-    role: "Graduate Data Science Research Assistant",
-    org: "Luddy School, Indiana University",
-  },
-  {
-    name: "Heeya Amin",
-    role: "Graduate Data Science Research Assistant",
-    org: "Luddy School, Indiana University",
-  },
 ];
 
 function hideOnError(e) {
@@ -75,10 +65,10 @@ export default function AboutModal({ open, onClose }) {
         >
           <div>
             <div className="ui-eyebrow" style={{ display: "block", marginBottom: 4 }}>
-              About this Dashboard
+              About Us
             </div>
             <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: "-0.02em" }}>
-              Aquatic Solar (AqPV)
+              The Team
             </div>
           </div>
           <button
@@ -101,19 +91,12 @@ export default function AboutModal({ open, onClose }) {
         </div>
 
         <div style={{ padding: "20px 24px 24px" }}>
-          <p style={{ fontSize: 14, lineHeight: 1.6, color: "var(--text-dim)", margin: "0 0 18px" }}>
-            The first public, interactive dashboard for global aquatic
-            photovoltaic (AqPV) installations — floating and pile-mounted solar
-            on lakes, reservoirs, and aquaculture ponds. It maps thousands of
-            installations and their host waterbodies, with satellite-derived
-            environmental metrics and climate classification computed through
-            Google Earth Engine. Developed as a research project of Indiana
-            University, supporting an accompanying dataset publication.
+          <p style={{ fontSize: 14, lineHeight: 1.6, color: "var(--text-dim)", margin: "0 0 20px" }}>
+            A collaboration between the O'Neill School of Public and
+            Environmental Affairs and the Luddy School of Informatics,
+            Computing, and Engineering at Indiana University.
           </p>
 
-          <div className="ui-eyebrow" style={{ display: "block", marginBottom: 12 }}>
-            The Team
-          </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 22 }}>
             {TEAM.map((m) => (
               <div
@@ -169,9 +152,6 @@ export default function AboutModal({ open, onClose }) {
             Affairs · Luddy School of Informatics, Computing, and Engineering
           </div>
 
-          <div style={{ fontSize: 11.5, color: "var(--text-mut)", marginTop: 16 }}>
-            Dataset: Valerio, A.M., et al. (2026). Aquatic Solar. Zenodo.
-          </div>
         </div>
       </div>
     </div>
