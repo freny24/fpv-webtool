@@ -1100,39 +1100,9 @@ export default function MapView({
         <div style={{ marginTop: 14, paddingTop: 14, borderTop: "1px solid var(--border)" }}>
           <div
             style={{
-              background: "#fff",
-              borderRadius: 10,
-              padding: "12px 16px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 18,
-            }}
-          >
-            <img
-              src="/oneill-logo.png"
-              alt="O'Neill School of Public and Environmental Affairs"
-              onError={(e) => {
-                e.currentTarget.style.display = "none";
-              }}
-              style={{ height: 34, objectFit: "contain", maxWidth: "48%" }}
-            />
-            <span style={{ width: 1, height: 30, background: "#d8dee9", flex: "0 0 auto" }} />
-            <img
-              src="/luddy-logo.jpg"
-              alt="Luddy School of Informatics, Computing, and Engineering"
-              onError={(e) => {
-                e.currentTarget.style.display = "none";
-              }}
-              style={{ height: 34, objectFit: "contain", maxWidth: "48%" }}
-            />
-          </div>
-          <div
-            style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              marginTop: 8,
             }}
           >
             <span style={{ fontSize: 10, color: "var(--text-mut)" }}>
@@ -1299,6 +1269,50 @@ export default function MapView({
             evidence of absence on the ground.
           </div>
         )}
+      </div>
+
+      {/* Institutional logos — pinned to the top-right corner */}
+      <div
+        style={{
+          position: "absolute",
+          top: 16,
+          right: 18,
+          zIndex: 1250,
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+        }}
+      >
+        <img
+          src="/oneill-logo.png"
+          alt="O'Neill School of Public and Environmental Affairs"
+          title="O'Neill School of Public and Environmental Affairs"
+          onError={(e) => {
+            e.currentTarget.style.display = "none";
+          }}
+          style={{
+            height: 46,
+            width: 46,
+            objectFit: "contain",
+            borderRadius: 9,
+            boxShadow: "0 4px 14px rgba(3,7,16,0.35)",
+          }}
+        />
+        <img
+          src="/luddy-logo.png"
+          alt="Luddy School of Informatics, Computing, and Engineering"
+          title="Luddy School of Informatics, Computing, and Engineering"
+          onError={(e) => {
+            e.currentTarget.style.display = "none";
+          }}
+          style={{
+            height: 46,
+            width: 46,
+            objectFit: "contain",
+            borderRadius: 9,
+            boxShadow: "0 4px 14px rgba(3,7,16,0.35)",
+          }}
+        />
       </div>
 
       <div

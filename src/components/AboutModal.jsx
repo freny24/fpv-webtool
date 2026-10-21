@@ -158,7 +158,7 @@ export default function AboutModal({ open, onClose }) {
               style={{ height: 44, objectFit: "contain" }}
             />
             <img
-              src="/luddy-logo.jpg"
+              src="/luddy-logo.png"
               alt="Luddy School of Informatics, Computing, and Engineering"
               onError={hideOnError}
               style={{ height: 44, objectFit: "contain" }}
