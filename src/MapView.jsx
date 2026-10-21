@@ -1371,19 +1371,31 @@ export default function MapView({
         </button>
       </div>
 
-      <button
-        onClick={() => setShowAdmin(true)}
-        className="seg-btn"
+      <div
         style={{
           position: "absolute",
           bottom: 20,
           right: 20,
           zIndex: 1200,
-          backdropFilter: "blur(8px)",
+          display: "flex",
+          gap: 8,
         }}
       >
-        Admin
-      </button>
+        <button
+          onClick={() => setShowAbout(true)}
+          className="seg-btn"
+          style={{ backdropFilter: "blur(8px)" }}
+        >
+          About
+        </button>
+        <button
+          onClick={() => setShowAdmin(true)}
+          className="seg-btn"
+          style={{ backdropFilter: "blur(8px)" }}
+        >
+          Admin
+        </button>
+      </div>
 
       {showVizPanel && (
         <div
